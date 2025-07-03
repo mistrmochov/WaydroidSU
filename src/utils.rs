@@ -309,7 +309,6 @@ pub fn cp_dir(source: PathBuf, destination: PathBuf) -> anyhow::Result<()> {
                         }
                         fs::copy(&item_path, &target_path)?;
                     } else {
-                        // Skipping missing file silently
                         msg_err(&format!(
                             "Warning: File \"{}\" doesn't exist or was moved.",
                             item_path.to_string_lossy()
