@@ -1,5 +1,5 @@
 use crate::constants::WAYDROID_CONFIG;
-use crate::container::WaydroidContainer;
+use crate::container::{WaydroidContainer, has_overlay};
 use crate::msg_sub;
 use crate::{msg_err, msg_err_str};
 use anyhow::anyhow;
@@ -366,4 +366,19 @@ pub fn getenforce() -> anyhow::Result<bool> {
     }
 
     Ok(output == "Enforcing")
+}
+
+pub fn create_tmpdir() -> anyhow::Result<()> {
+    let has_overlay = has_overlay().expect(&msg_err_str(
+        "Couldn't reach the \"mount_overlays\" config.",
+    ));
+    let tempdir = temp_dir().join("waydroidsu");
+    if tempdir.exists() {
+        if has_overlay && is_mounted_at("mnt")? {
+            umount_system(true)?;
+        }
+        fs::remove_dir_all(&tempdir)?;
+    }
+    fs::create_dir(&tempdir)?;
+    Ok(())
 }

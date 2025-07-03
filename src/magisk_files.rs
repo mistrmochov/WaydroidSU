@@ -2,9 +2,9 @@ use crate::constants::*;
 use crate::container::{WaydroidContainer, has_overlay};
 use crate::magisk::Magisk;
 use crate::utils::{
-    chmod_755_recursive, cp_dir, create_dir_check, download_file, generate_random_string,
-    get_magisk_info, getenforce, gzip_compress, gzip_decompress, is_mounted_at, mount_system,
-    umount_system, unzip_file,
+    chmod_755_recursive, cp_dir, create_dir_check, create_tmpdir, download_file,
+    generate_random_string, get_magisk_info, getenforce, gzip_compress, gzip_decompress,
+    is_mounted_at, mount_system, umount_system, unzip_file,
 };
 use crate::{get_data_home, msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
@@ -151,9 +151,8 @@ pub fn install(arch: &str, custom_apk: &str, update: bool) -> anyhow::Result<()>
 
         let tempdir = temp_dir().join("waydroidsu");
         let magisk_tmp = tempdir.join("magisk");
-        if !tempdir.exists() {
-            fs::create_dir(&tempdir)?;
-        }
+        create_tmpdir()?;
+
         let apk = tempdir.join("magisk.apk");
         if custom_apk == "" {
             let json_file = tempdir.join("canary.json");
@@ -312,9 +311,8 @@ pub fn update(arch: &str) -> anyhow::Result<()> {
         return Err(anyhow!("KitsuneMagisk is not installed."));
     }
     let tempdir = temp_dir().join("waydroidsu");
-    if !tempdir.exists() {
-        fs::create_dir(&tempdir)?;
-    }
+    create_tmpdir()?;
+
     let json_file = tempdir.join("canary.json");
     download_file(
         "https://raw.githubusercontent.com/mistrmochov/KitsuneMagisk-Waydroid/refs/heads/kitsune/canary.json",
@@ -371,6 +369,8 @@ pub fn remove(recover: bool, update: bool) -> anyhow::Result<()> {
         "Couldn't reach the \"mount_overlays\" config.",
     ));
     let tempdir = temp_dir().join("waydroidsu");
+    create_tmpdir()?;
+
     let rootfs;
     let overlay_rw = PathBuf::from(WAYDROID_DIR).join("overlay_rw/system");
     if has_overlay {

@@ -1,6 +1,6 @@
 use crate::container::WaydroidContainer;
 use crate::magisk_files::{magisk_is_installed, magisk_is_set_up, waydroid_su};
-use crate::utils::{getenforce, unzip_file};
+use crate::utils::{create_tmpdir, getenforce, unzip_file};
 use crate::{get_data_home, msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
@@ -184,6 +184,7 @@ impl Magisk {
 
     fn get_module_name(&self, path: &str) -> anyhow::Result<String> {
         let tmp = temp_dir().join("waydroidsu");
+        create_tmpdir()?;
         let tmpdir = tmp.join("module_name");
         if !tmpdir.exists() {
             fs::create_dir_all(tmpdir.clone())?;
