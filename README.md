@@ -37,7 +37,7 @@ Dependencies
 - Fedora: `dbus-devel`, `openssl-devel`, `pkgconf-pkg-config`
 - Arch: `dbus`, `openssl`, `base-devel`
 - SUSE: `dbus-1-devel`, `libopenssl-devel`, `pkgconf`
-- Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`
+- Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`, `build-base`
 
 ## Installation
 
