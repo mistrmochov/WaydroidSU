@@ -373,7 +373,7 @@ pub fn create_tmpdir() -> anyhow::Result<()> {
     ));
     let tempdir = temp_dir().join("waydroidsu");
     if tempdir.exists() {
-        if has_overlay && is_mounted_at("mnt")? {
+        if !has_overlay && is_mounted_at("mnt")? {
             umount_system(true)?;
         }
         fs::remove_dir_all(&tempdir)?;
