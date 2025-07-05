@@ -41,6 +41,13 @@ Dependencies
 
 ## Installation
 
+Runtime dependencies
+- Ubuntu/Debian: `liblzma5`, `libbz2-1.0`, `libssl3`, `libdbus-1-3`
+- Fedora: `xz-libs`, `bzip2-libs`, `openssl`, `dbus-libs`
+- Arch: `xz`, `bzip2`, `openssl`, `dbus`
+- SUSE: `liblzma5`, `libbz2-1`, `libopenssl3`, `libdbus-1-3`
+- Alpine: `xz-libs`, `bzip2`, `libssl3`, `libcrypto3`, `dbus-libs`
+
 As of now only way to install this project is by building it, but packages will be avialable soon in releases.
 
 Run the following commmands to build and install WaydroidSU:
