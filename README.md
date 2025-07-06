@@ -54,6 +54,7 @@ Run the following commmands to build and install WaydroidSU:
 
 ```bash
 git clone https://github.com/mistrmochov/WaydroidSU
+cd WaydroidSU
 make
 sudo make install
 ```
