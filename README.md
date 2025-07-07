@@ -9,11 +9,12 @@
 - [WaydroidSU](#waydroidsu)
   - [Introduction](#introduction)
   - [Notice](#notice)
-  - [Building](#building)
   - [Installation](#installation)
+    - [Notice](#notice-1)
+  - [Building](#building)
   - [Usage](#usage)
     - [Installation of KitsuneMagisk using WaydroidSU](#installation-of-kitsunemagisk-using-waydroidsu)
-      - [Notice](#notice-1)
+      - [Notice](#notice-2)
     - [Updating Magisk using WaydroidSU](#updating-magisk-using-waydroidsu)
   - [SELinux - fully supported!](#selinux---fully-supported)
   - [Compatibility](#compatibility)
@@ -28,6 +29,45 @@ As a follow up to this, I decided to develop full Magisk CLI installer and manag
 
 Keep in mind, that this project is still in early stages and there might be some unexpected issues.
 
+## Installation
+
+You can install WaydroidSU by installing packages from [releases](https://github.com/mistrmochov/WaydroidSU/releases)
+
+Choose your package accordingly for your distro and your architecture.
+
+Download your selected package and use your package manager to install it.
+
+Ubuntu:
+```bash
+sudo apt install ./wsu-0.1.0-1-x86_64-ubuntu_24+.deb
+```
+
+Fedora:
+```bash
+sudo dnf install ./wsu-0.1.0-1-x86_64-fc42.rpm
+```
+
+Arch:
+```bash
+sudo pacman -U ./wsu-0.1.0-1-x86_64-archlinux.pkg.tar.zst
+```
+
+SUSE:
+```bash
+sudo zypper in ./wsu-0.1.0-1-x86_64-suse.rpm
+```
+
+Alpine:
+```bash
+sudo apk add ./wsu-0.1.0-1-x86_64-alpine.apk
+```
+
+If your distro isn't in releases you will have to build it yourself. I would still recommend you to build the program yourself always, it will make your life easier when updating and you will have always the latest build.
+
+### Notice
+
+If you are using SUSE you might get a warning from zypper, that the package is not signed, you can ignore this message and continue by selecting `i`, also this package has been built on SUSE Tumbleweed.
+
 ## Building
 
 Main building dependencies are `make` and `cargo`. This project has been made on Rust version `1.88.0`, if your cargo version from your package manager isn't compatible with this project, please install cargo using rustup or install rust manually from the official website: https://www.rust-lang.org/tools/install
@@ -39,16 +79,12 @@ Dependencies
 - SUSE: `dbus-1-devel`, `libopenssl-devel`, `pkgconf`
 - Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`, `build-base`
 
-## Installation
-
 Runtime dependencies
 - Ubuntu/Debian: `liblzma5`, `libbz2-1.0`, `libssl3`, `libdbus-1-3`
 - Fedora: `xz-libs`, `bzip2-libs`, `openssl`, `dbus-libs`
 - Arch: `xz`, `bzip2`, `openssl`, `dbus`
 - SUSE: `liblzma5`, `libbz2-1`, `libopenssl3`, `libdbus-1-3`
 - Alpine: `xz-libs`, `bzip2`, `libssl3`, `libcrypto3`, `dbus-libs`
-
-As of now only way to install this project is by building it, but packages will be avialable soon in releases.
 
 Run the following commmands to build and install WaydroidSU:
 
