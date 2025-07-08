@@ -151,3 +151,9 @@ I have managed to get this working even on devices with SELinux enforcing enable
 ## Compatibility
 
 At this point, this project only supports systems with 64 bits architecture.
+
+## Issues
+
+Some magisk modules in KitsuneMagisk might cause that Play Store cannot be loaded, it's basically stuck on the Play Store logo.
+
+So in my case, module `tricky_store` has been causing this issue. You can fix this issue by enabling `sulist` in `magiskhide` through the magisk manager or via WaydroidSU.
