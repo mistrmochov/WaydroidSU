@@ -82,7 +82,7 @@ pub fn get_data_home() -> anyhow::Result<String> {
                 }
             }
         }
-        Ok("".to_string())
+        Err(anyhow!("Couldn't get current xdg_data_home"))
     }
     if let OtherOk(sudo_home) = env::var("SUDO_HOME") {
         if !sudo_home.contains("root") {
@@ -94,7 +94,7 @@ pub fn get_data_home() -> anyhow::Result<String> {
     } else {
         return Ok(xdg_data_home()?);
     }
-    Ok("".to_string())
+    Err(anyhow!("Couldn't get current xdg_data_home"))
 }
 
 pub fn msg_err(msg: &str) {

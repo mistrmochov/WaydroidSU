@@ -58,6 +58,8 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
             }
         }
 
+        let waydroid_data = PathBuf::from(get_data_home()?).join("waydroid/data");
+
         let tempdir = temp_dir().join("waydroidsu");
         let magisk_tmp = tempdir.join("magisk");
         create_tmpdir()?;
@@ -80,8 +82,6 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
         let magisk_dir = rootfs.join(MAGISK_DIR);
         let bootanim_rc_path = rootfs.join(BOOTANIM_RC_PATH);
         let bootanim_rc_gz_path = rootfs.join(BOOTANIM_RC_GZ_PATH);
-
-        let waydroid_data = PathBuf::from(get_data_home()?).join("waydroid/data");
 
         if new {
             patch_sepolicy_prepare(waydroid_data.clone(), libs.join("libmagiskpolicy.so"))?;
@@ -157,7 +157,7 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
 
         if new {
             patch_sepolicy(magisk_dir.clone(), rootfs.clone(), waydroid_data.clone())?;
-            patch_init_zygote(rootfs.clone(), waydroid_data)?;
+            patch_init_zygote(rootfs.clone(), waydroid_data.clone())?;
             create_dir_check(rootfs.join("system/etc/init"), false)?;
         }
 
@@ -166,7 +166,7 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
         msg_sub("Finishing installation");
 
         if update {
-            let data_adb = PathBuf::from(get_data_home()?).join("waydroid/data/adb");
+            let data_adb = waydroid_data.join("adb");
             let magisk_path = data_adb.join("magisk");
             if magisk_path.exists() {
                 fs::remove_dir_all(&magisk_path)?;
