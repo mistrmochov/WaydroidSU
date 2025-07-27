@@ -2,7 +2,7 @@ use crate::constants::*;
 use crate::magisk_files::waydroid_su;
 use crate::msg_sub;
 use crate::utils::*;
-use anyhow::{Ok, anyhow};
+use anyhow::Ok;
 use libc::setxattr;
 use std::ffi::CString;
 use std::fs::{self, OpenOptions, Permissions};

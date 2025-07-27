@@ -8,11 +8,11 @@ use crate::utils::{get_arch, is_mounted_at, umount_system};
 use anyhow::{Ok, anyhow};
 use clap::Parser;
 use colored::*;
+use std::env;
 use std::env::temp_dir;
 use std::path::PathBuf;
 use std::process::Command;
 use std::result::Result::Ok as OtherOk;
-use std::{env, fs};
 use which::which;
 
 mod cli;
@@ -157,18 +157,12 @@ fn magisk_or_err(magisk: &Magisk, applet: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn hihi() -> anyhow::Result<()> {
-    fs::write("/home/matysek/meowyyyy.txt", "hihi")?;
-    Ok(())
-}
-
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     try_run_or_exit!(preflight());
 
     match cli.command {
-        Commands::Hihi => try_run!(hihi()),
         Commands::Status => {
             try_run!(status());
         }

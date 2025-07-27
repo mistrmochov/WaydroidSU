@@ -43,8 +43,6 @@ pub enum Commands {
         #[command(subcommand)]
         command: ZygiskCommand,
     },
-    #[command(about = "Hihi")]
-    Hihi,
 }
 
 #[derive(Args)]
