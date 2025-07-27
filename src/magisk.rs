@@ -1,5 +1,6 @@
 use crate::container::WaydroidContainer;
 use crate::magisk_files::{magisk_is_installed, magisk_is_set_up, waydroid_su};
+use crate::selinux::getenforce;
 use crate::utils::{create_tmpdir, unzip_file};
 use crate::{get_data_home, msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
@@ -274,7 +275,12 @@ impl Magisk {
         Ok(())
     }
 
-    pub fn cmd(&mut self, applet: &str, args: Vec<&str>) -> anyhow::Result<String> {
+    pub fn cmd(
+        &mut self,
+        applet: &str,
+        args: Vec<&str>,
+        force_no_su: bool,
+    ) -> anyhow::Result<String> {
         if !self.waydroid.is_container_running()? {
             return Err(anyhow!("Waydroid container isn't running!"));
         }
@@ -285,7 +291,7 @@ impl Magisk {
         args_new.push("magisk");
         args_new.push(&applet);
         args_new.extend(args.iter().map(|s| s));
-        let out = waydroid_su(args_new, false)?;
+        let out = waydroid_su(args_new, force_no_su)?;
         if applet != "--sqlite" {
             if !out.is_empty() {
                 println!("{}", out.bold());
@@ -294,14 +300,14 @@ impl Magisk {
         Ok(out)
     }
 
-    pub fn sqlite(&mut self, arg: &str) -> anyhow::Result<String> {
+    pub fn sqlite(&mut self, arg: &str, force_no_su: bool) -> anyhow::Result<String> {
         if !self.waydroid.is_container_running()? {
             return Err(anyhow!("Waydroid container isn't running!"));
         }
         if !self.installed {
             return Err(anyhow!("Magisk isn't installed!"));
         }
-        Ok(self.cmd("--sqlite", vec![arg])?)
+        Ok(self.cmd("--sqlite", vec![arg], force_no_su)?)
     }
 
     pub fn get_zygisk(&mut self) -> anyhow::Result<bool> {
@@ -311,7 +317,11 @@ impl Magisk {
         if !self.installed {
             return Err(anyhow!("Magisk isn't installed!"));
         }
-        let zygisk_str = self.sqlite("\"SELECT value FROM settings WHERE key == \'zygisk\'\"")?;
+        let getenforce = getenforce()?;
+        let zygisk_str = self.sqlite(
+            "\"SELECT value FROM settings WHERE key == 'zygisk'\"",
+            getenforce,
+        )?;
 
         if let Some(zygisk) = zygisk_str.trim().split('=').last() {
             return Ok(zygisk == "1");
@@ -326,10 +336,17 @@ impl Magisk {
         if !self.installed {
             return Err(anyhow!("Magisk isn't installed!"));
         }
+        let getenforce = getenforce()?;
         if enabled {
-            self.sqlite("\"REPLACE INTO settings (key,value) VALUES(\'zygisk\',1)\"")?;
+            self.sqlite(
+                "\"REPLACE INTO settings (key,value) VALUES('zygisk',1)\"",
+                getenforce,
+            )?;
         } else {
-            self.sqlite("\"REPLACE INTO settings (key,value) VALUES(\'zygisk\',0)\"")?;
+            self.sqlite(
+                "\"REPLACE INTO settings (key,value) VALUES('zygisk',0)\"",
+                getenforce,
+            )?;
         }
         Ok(())
     }

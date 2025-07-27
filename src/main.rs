@@ -213,26 +213,32 @@ fn main() -> anyhow::Result<()> {
             let mut magisk = magisk_or_exit!();
             try_run_or_exit!(kitsune_or_err(&magisk, "magiskhide"));
             match command {
-                MagiskhideCommand::Status => try_run!(magisk.cmd("magiskhide", vec!["status"])),
-                MagiskhideCommand::Enable => try_run!(magisk.cmd("magiskhide", vec!["enable"])),
-                MagiskhideCommand::Disable => try_run!(magisk.cmd("magiskhide", vec!["disable"])),
+                MagiskhideCommand::Status => {
+                    try_run!(magisk.cmd("magiskhide", vec!["status"], false))
+                }
+                MagiskhideCommand::Enable => {
+                    try_run!(magisk.cmd("magiskhide", vec!["enable"], false))
+                }
+                MagiskhideCommand::Disable => {
+                    try_run!(magisk.cmd("magiskhide", vec!["disable"], false))
+                }
                 MagiskhideCommand::Sulist { command: Some(sub) } => match sub {
                     SulistSubCommand::Enable => {
-                        try_run!(magisk.cmd("magiskhide", vec!["sulist", "enable"]))
+                        try_run!(magisk.cmd("magiskhide", vec!["sulist", "enable"], false))
                     }
                     SulistSubCommand::Disable => {
-                        try_run!(magisk.cmd("magiskhide", vec!["sulist", "disable"]))
+                        try_run!(magisk.cmd("magiskhide", vec!["sulist", "disable"], false))
                     }
                 },
                 MagiskhideCommand::Sulist { command: None } => {
-                    try_run!(magisk.cmd("magiskhide", vec!["sulist"]))
+                    try_run!(magisk.cmd("magiskhide", vec!["sulist"], false))
                 }
-                MagiskhideCommand::Ls => try_run!(magisk.cmd("magiskhide", vec!["ls"])),
+                MagiskhideCommand::Ls => try_run!(magisk.cmd("magiskhide", vec!["ls"], false)),
                 MagiskhideCommand::Add(arg) => {
-                    try_run!(magisk.cmd("magiskhide", vec!["add", &arg.pkg]))
+                    try_run!(magisk.cmd("magiskhide", vec!["add", &arg.pkg], false))
                 }
                 MagiskhideCommand::Rm(arg) => {
-                    try_run!(magisk.cmd("magiskhide", vec!["rm", &arg.pkg]))
+                    try_run!(magisk.cmd("magiskhide", vec!["rm", &arg.pkg], false))
                 }
             }
         }
@@ -240,15 +246,21 @@ fn main() -> anyhow::Result<()> {
             let mut magisk = magisk_or_exit!();
             try_run_or_exit!(magisk_or_err(&magisk, "denylist"));
             match command {
-                DenylistCommand::Status => try_run!(magisk.cmd("--denylist", vec!["status"])),
-                DenylistCommand::Enable => try_run!(magisk.cmd("--denylist", vec!["enable"])),
-                DenylistCommand::Disable => try_run!(magisk.cmd("--denylist", vec!["disable"])),
-                DenylistCommand::Ls => try_run!(magisk.cmd("--denylist", vec!["ls"])),
+                DenylistCommand::Status => {
+                    try_run!(magisk.cmd("--denylist", vec!["status"], false))
+                }
+                DenylistCommand::Enable => {
+                    try_run!(magisk.cmd("--denylist", vec!["enable"], false))
+                }
+                DenylistCommand::Disable => {
+                    try_run!(magisk.cmd("--denylist", vec!["disable"], false))
+                }
+                DenylistCommand::Ls => try_run!(magisk.cmd("--denylist", vec!["ls"], false)),
                 DenylistCommand::Add(arg) => {
-                    try_run!(magisk.cmd("--denylist", vec!["add", &arg.pkg]))
+                    try_run!(magisk.cmd("--denylist", vec!["add", &arg.pkg], false))
                 }
                 DenylistCommand::Rm(arg) => {
-                    try_run!(magisk.cmd("--denylist", vec!["rm", &arg.pkg]))
+                    try_run!(magisk.cmd("--denylist", vec!["rm", &arg.pkg], false))
                 }
             }
         }
