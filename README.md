@@ -28,7 +28,7 @@ As a follow up to this, I decided to develop full Magisk CLI installer and manag
 
 ## Notice
 
-If you are using latest git version of this project right now, there might some issues. My update is still incomplete!
+If you are using latest git version of this project right now, there might some issues. My update might still contain some bugs!
 
 ## Installation
 
@@ -120,6 +120,7 @@ By default Magisk is installed to Waydroid's overlay system, however if your Way
 
 ```bash
 sudo wsu install # Normal installation
+sudo wsu install --new # My new modern fork of Magisk
 sudo wsu install --apk /path/to/apk # Not recommended since this is the only version, that will work on Waydroid
 ```
 
