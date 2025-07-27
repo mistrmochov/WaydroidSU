@@ -41,7 +41,8 @@ pub fn set_selinux_attr(file: &str, name: &str, value: &str) -> anyhow::Result<(
     if ret == 0 {
         Ok(())
     } else {
-        Err(anyhow!("settattr failed"))
+        // setattr failed, ignoring
+        Ok(())
     }
 }
 
