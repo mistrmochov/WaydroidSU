@@ -2,7 +2,7 @@ use crate::constants::WAYDROID_CONFIG;
 use crate::container::{WaydroidContainer, has_overlay};
 use crate::msg_sub;
 use crate::{msg_err, msg_err_str};
-use anyhow::anyhow;
+use anyhow::{Ok, anyhow};
 use colored::*;
 use flate2::Compression;
 use flate2::read::GzDecoder;
@@ -72,97 +72,125 @@ fn get_systemimg_path() -> anyhow::Result<PathBuf, Box<dyn std::error::Error>> {
     let images = conf
         .get("waydroid", "images_path")
         .expect(&msg_err_str("Coldn't get path for images!"));
-    Ok(PathBuf::from(images).join("system.img"))
+    OtherOk(PathBuf::from(images).join("system.img"))
 }
 
-pub fn mount_system(
-    mut waydroid: WaydroidContainer,
-    resize: bool,
-    quiet: bool,
-) -> anyhow::Result<bool> {
+fn get_vendorimg_path() -> anyhow::Result<PathBuf, Box<dyn std::error::Error>> {
+    let mut conf = Ini::new();
+    conf.load(WAYDROID_CONFIG)?;
+    let images = conf
+        .get("waydroid", "images_path")
+        .expect(&msg_err_str("Coldn't get path for images!"));
+    OtherOk(PathBuf::from(images).join("vendor.img"))
+}
+
+pub fn get_image_size(image: PathBuf) -> anyhow::Result<u64> {
+    let file = File::open(image)?;
+    Ok(file.metadata()?.len())
+}
+
+pub fn mount_system(mut waydroid: WaydroidContainer, quiet: bool) -> anyhow::Result<bool> {
+    fn run_checked_command(cmd: &str, args: &[&str]) -> anyhow::Result<()> {
+        if let OtherOk(status) = Command::new(cmd)
+            .args(args)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+        {
+            if !status.success() {
+                return Err(anyhow!("Command {} exited with failure code!", cmd));
+            }
+        } else {
+            return Err(anyhow!("Failed to run {} command!", cmd));
+        }
+        Ok(())
+    }
+
+    fn try_mount_with_retries(image: &Path, target: &Path, tries: usize) -> anyhow::Result<()> {
+        for i in 1..=tries {
+            if let OtherOk(status) = Command::new("mount")
+                .args([
+                    "-o",
+                    "rw,loop",
+                    image.to_string_lossy().trim(),
+                    target.to_string_lossy().trim(),
+                ])
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+            {
+                if status.success() {
+                    return Ok(());
+                } else if i == tries {
+                    return Err(anyhow!("Command mount exited with failure code!"));
+                }
+            } else if i == tries {
+                return Err(anyhow!("Failed to run mount command!"));
+            }
+            sleep(Duration::from_secs(1));
+        }
+        Ok(())
+    }
+
     if waydroid.is_session_running(true, false)? {
         waydroid.stop(true)?;
     }
+
     let system = get_systemimg_path().expect(&msg_err_str("Failed to get system img path!"));
     if !system.exists() {
         return Err(anyhow!("Couldn't find Waydroid system image!"));
     }
-    if let Ok(status) = Command::new("e2fsck")
-        .args(["-y", "-f", system.to_string_lossy().trim()])
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-    {
-        if !status.success() {
-            return Err(anyhow!("Command e2fsck exited with failure code!"));
-        }
-    } else {
-        return Err(anyhow!("Failed to run e2fsck command!"));
-    }
 
-    if resize {
+    run_checked_command("e2fsck", &["-y", "-f", system.to_string_lossy().trim()])?;
+
+    if get_image_size(system.clone())? < 3221225472 {
         if !quiet {
             msg_sub("Resizing system image");
         }
-        if let Ok(status) = Command::new("resize2fs")
-            .args([system.to_string_lossy().trim(), "3G"])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-        {
-            if !status.success() {
-                return Err(anyhow!("Command resize2fs exited with failure code!"));
-            }
-        } else {
-            return Err(anyhow!("Failed to run resize2fs command!"));
+        run_checked_command("resize2fs", &[system.to_string_lossy().trim(), "3G"])?;
+    }
+
+    let vendor = get_vendorimg_path().expect(&msg_err_str("Failed to get vendor img path!"));
+    if !vendor.exists() {
+        return Err(anyhow!("Couldn't find Waydroid vendor image!"));
+    }
+
+    run_checked_command("e2fsck", &["-y", "-f", vendor.to_string_lossy().trim()])?;
+
+    if get_image_size(vendor.clone())? < 1073741824 {
+        if !quiet {
+            msg_sub("Resizing vendor image");
         }
+        run_checked_command("resize2fs", &[vendor.to_string_lossy().trim(), "1G"])?;
     }
 
     let mnt = temp_dir().join("waydroidsu/mnt");
+    let vendor_mnt = mnt.join("vendor");
     if !mnt.exists() {
-        fs::create_dir_all(mnt.clone())?;
+        fs::create_dir_all(&mnt)?;
     }
+
     if !quiet {
         msg_sub("Mounting system image");
     }
-    let tries = 5;
-    for i in 1..=tries {
-        if let Ok(status) = Command::new("mount")
-            .args([
-                "-o",
-                "rw,loop",
-                system.to_string_lossy().trim(),
-                mnt.to_string_lossy().trim(),
-            ])
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-        {
-            if !status.success() {
-                if i == tries {
-                    return Err(anyhow!("Command mount exited with failure code!"));
-                }
-            } else {
-                break;
-            }
-        } else {
-            if i == tries {
-                return Err(anyhow!("Failed to run mount command!"));
-            }
-        }
-        sleep(Duration::from_secs(1));
+    try_mount_with_retries(&system, &mnt, 5)?;
+
+    if !quiet {
+        msg_sub("Mounting vendor image");
     }
+    try_mount_with_retries(&vendor, &vendor_mnt, 5)?;
+
     Ok(true)
 }
 
 pub fn umount_system(quiet: bool) -> anyhow::Result<bool> {
     let mnt = temp_dir().join("waydroidsu/mnt");
     if !quiet {
-        msg_sub("Umounting system image");
+        msg_sub("Umounting system and vendor image");
     }
     let tries = 5;
     for i in 1..=tries {
-        if let Ok(status) = Command::new("umount").arg(mnt.clone()).status() {
+        if let OtherOk(status) = Command::new("umount").arg("-R").arg(mnt.clone()).status() {
             if !status.success() {
                 if i == tries {
                     return Err(anyhow!("Command umount exited with failure code!"));
@@ -180,12 +208,12 @@ pub fn umount_system(quiet: bool) -> anyhow::Result<bool> {
     Ok(true)
 }
 
-pub fn is_mounted_at(target_mount: &str) -> std::io::Result<bool> {
+pub fn is_mounted_at(target_mount: &str) -> anyhow::Result<bool> {
     let file = File::open("/proc/mounts")?;
     let reader = BufReader::new(file);
 
     for line in reader.lines() {
-        if let Ok(line) = line {
+        if let OtherOk(line) = line {
             let parts: Vec<&str> = line.split_whitespace().collect();
             if parts.len() >= 2 && parts[1] == target_mount {
                 return Ok(true);
@@ -227,7 +255,7 @@ pub fn download_file(url: &str, output_path: &str, quiet: bool) -> anyhow::Resul
     let mut downloaded = 0u64;
     let mut buffer = [0; 8192];
 
-    while let Ok(n) = source.read(&mut buffer) {
+    while let OtherOk(n) = source.read(&mut buffer) {
         if n == 0 {
             break;
         }
@@ -260,11 +288,9 @@ pub fn get_arch() -> (&'static str, bool) {
 pub fn create_dir_check(dir: PathBuf, erasing: bool) -> anyhow::Result<()> {
     if !dir.exists() {
         fs::create_dir_all(dir.clone())?;
-    } else {
-        if erasing {
-            fs::remove_dir_all(dir.clone())?;
-            fs::create_dir_all(dir)?;
-        }
+    } else if erasing {
+        fs::remove_dir_all(dir.clone())?;
+        fs::create_dir_all(dir)?;
     }
     Ok(())
 }
@@ -322,7 +348,7 @@ pub fn cp_dir(source: PathBuf, destination: PathBuf) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn gzip_compress(input_path: &str, output_path: &str) -> std::io::Result<()> {
+pub fn gzip_compress(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let input = File::open(input_path)?;
     let reader = BufReader::new(input);
 
@@ -336,7 +362,7 @@ pub fn gzip_compress(input_path: &str, output_path: &str) -> std::io::Result<()>
     Ok(())
 }
 
-pub fn gzip_decompress(input_path: &str, output_path: &str) -> std::io::Result<()> {
+pub fn gzip_decompress(input_path: &str, output_path: &str) -> anyhow::Result<()> {
     let input = File::open(input_path)?;
     let reader = GzDecoder::new(BufReader::new(input));
 
@@ -356,17 +382,6 @@ pub fn generate_random_string(len: usize) -> String {
         .collect()
 }
 
-pub fn getenforce() -> anyhow::Result<bool> {
-    let output;
-    if let Ok(out) = Command::new("getenforce").output() {
-        output = String::from_utf8_lossy(&out.stdout).trim().to_string();
-    } else {
-        output = String::new();
-    }
-
-    Ok(output == "Enforcing")
-}
-
 pub fn create_tmpdir() -> anyhow::Result<()> {
     let has_overlay = has_overlay().expect(&msg_err_str(
         "Couldn't reach the \"mount_overlays\" config.",
@@ -380,4 +395,16 @@ pub fn create_tmpdir() -> anyhow::Result<()> {
     }
     fs::create_dir(&tempdir)?;
     Ok(())
+}
+
+pub fn remove_check(file: PathBuf) -> anyhow::Result<bool> {
+    let exists = file.exists();
+    if file.exists() {
+        if file.is_dir() {
+            fs::remove_dir_all(file.clone())?;
+        } else {
+            fs::remove_file(file.clone())?;
+        }
+    }
+    Ok(exists)
 }

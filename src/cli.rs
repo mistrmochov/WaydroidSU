@@ -3,7 +3,7 @@ use clap::{Args, Parser, Subcommand};
 #[command(
     name = "wsu",
     version,
-    about = "CLI KitsuneMagisk manager for Waydroid",
+    about = "CLI Magisk manager for Waydroid",
     disable_help_subcommand = true
 )]
 pub struct Cli {
@@ -15,35 +15,44 @@ pub struct Cli {
 pub enum Commands {
     #[command(about = "Show Magisk status")]
     Status,
-    #[command(about = "Install KitsuneMagisk")]
+    #[command(about = "Install Magisk")]
     Install(InstallArgs),
-    #[command(about = "Run additional setup for KitsuneMagisk")]
+    #[command(about = "Run additional setup for Magisk")]
     Setup,
-    #[command(about = "Remove KitsuneMagisk")]
+    #[command(about = "Remove Magisk")]
     Remove,
-    #[command(about = "Update KitsuneMagisk")]
+    #[command(about = "Update Magisk")]
     Update,
     #[command(about = "Manage magisk modules")]
     Module {
         #[command(subcommand)]
         command: ModuleCommand,
     },
-    #[command(about = "Manage MagiskHide")]
+    #[command(about = "Manage MagiskHide (Kitsune)")]
     Magiskhide {
         #[command(subcommand)]
         command: MagiskhideCommand,
+    },
+    #[command(about = "Manage Denylist (Magisk)")]
+    Denylist {
+        #[command(subcommand)]
+        command: DenylistCommand,
     },
     #[command(about = "Manage Zygisk")]
     Zygisk {
         #[command(subcommand)]
         command: ZygiskCommand,
     },
+    #[command(about = "Hihi")]
+    Hihi,
 }
 
 #[derive(Args)]
 pub struct InstallArgs {
     #[arg(long, help = "Path to target apk (optional)")]
     pub apk: Option<String>,
+    #[arg(short, long, help = "Experimental version of Magisk")]
+    pub new: bool,
 }
 
 #[derive(Subcommand)]
@@ -64,6 +73,22 @@ pub enum MagiskhideCommand {
     #[command(about = "Remove target from hidelist/sulist")]
     Rm(AddRemoveArgs),
     #[command(about = "List targets in hidelist/sulist")]
+    Ls,
+}
+
+#[derive(Subcommand)]
+pub enum DenylistCommand {
+    #[command(about = "Show Denylist status")]
+    Status,
+    #[command(about = "Enable Denylist")]
+    Enable,
+    #[command(about = "Disable Denylist")]
+    Disable,
+    #[command(about = "Add target to Denylist")]
+    Add(AddRemoveArgs),
+    #[command(about = "Remove target from Denylist")]
+    Rm(AddRemoveArgs),
+    #[command(about = "List targets in Denylist")]
     Ls,
 }
 

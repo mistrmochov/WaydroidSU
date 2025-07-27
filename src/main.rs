@@ -1,24 +1,27 @@
 use crate::cli::*;
 use crate::constants::WAYDROID_CONFIG;
 use crate::container::WaydroidContainer;
+use crate::install::{install, remove, setup, update};
 use crate::magisk::Magisk;
-use crate::magisk_files::{install, remove, setup, update};
+use crate::magisk_files::status;
 use crate::utils::{get_arch, is_mounted_at, umount_system};
 use anyhow::{Ok, anyhow};
 use clap::Parser;
 use colored::*;
-use std::env;
 use std::env::temp_dir;
 use std::path::PathBuf;
 use std::process::Command;
 use std::result::Result::Ok as OtherOk;
+use std::{env, fs};
 use which::which;
 
 mod cli;
 mod constants;
 mod container;
+mod install;
 mod magisk;
 mod magisk_files;
+mod selinux;
 mod utils;
 
 macro_rules! magisk_or_exit {
@@ -134,21 +137,46 @@ fn preflight() -> anyhow::Result<()> {
     Ok(())
 }
 
+fn kitsune_or_err(magisk: &Magisk, applet: &str) -> anyhow::Result<()> {
+    if !magisk.version().contains("kitsune") && !magisk.version().contains("v27.2-Waydroid") {
+        return Err(anyhow!(format!(
+            "{} - Is only available for Kitsune",
+            applet
+        )));
+    }
+    Ok(())
+}
+
+fn magisk_or_err(magisk: &Magisk, applet: &str) -> anyhow::Result<()> {
+    if magisk.version().contains("kitsune") || magisk.version().contains("v27.2-Waydroid") {
+        return Err(anyhow!(format!(
+            "{} - Is only available for Magisk",
+            applet
+        )));
+    }
+    Ok(())
+}
+
+fn hihi() -> anyhow::Result<()> {
+    fs::write("/home/matysek/meowyyyy.txt", "hihi")?;
+    Ok(())
+}
+
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     try_run_or_exit!(preflight());
 
     match cli.command {
+        Commands::Hihi => try_run!(hihi()),
         Commands::Status => {
-            let mut magisk = magisk_or_exit!();
-            try_run!(magisk.status());
+            try_run!(status());
         }
         Commands::Install(args) => {
             let (arch, arch_supported) = get_arch();
             if arch_supported {
                 let apk_path = args.apk.unwrap_or_else(|| "".to_string());
-                if let Err(e) = install(arch, &apk_path, false) {
+                if let Err(e) = install(arch, &apk_path, false, args.new) {
                     msg_err(&e.to_string());
                     try_run!(remove(true, false));
                 }
@@ -189,6 +217,7 @@ fn main() -> anyhow::Result<()> {
         }
         Commands::Magiskhide { command } => {
             let mut magisk = magisk_or_exit!();
+            try_run_or_exit!(kitsune_or_err(&magisk, "magiskhide"));
             match command {
                 MagiskhideCommand::Status => try_run!(magisk.cmd("magiskhide", vec!["status"])),
                 MagiskhideCommand::Enable => try_run!(magisk.cmd("magiskhide", vec!["enable"])),
@@ -210,6 +239,22 @@ fn main() -> anyhow::Result<()> {
                 }
                 MagiskhideCommand::Rm(arg) => {
                     try_run!(magisk.cmd("magiskhide", vec!["rm", &arg.pkg]))
+                }
+            }
+        }
+        Commands::Denylist { command } => {
+            let mut magisk = magisk_or_exit!();
+            try_run_or_exit!(magisk_or_err(&magisk, "denylist"));
+            match command {
+                DenylistCommand::Status => try_run!(magisk.cmd("--denylist", vec!["status"])),
+                DenylistCommand::Enable => try_run!(magisk.cmd("--denylist", vec!["enable"])),
+                DenylistCommand::Disable => try_run!(magisk.cmd("--denylist", vec!["disable"])),
+                DenylistCommand::Ls => try_run!(magisk.cmd("--denylist", vec!["ls"])),
+                DenylistCommand::Add(arg) => {
+                    try_run!(magisk.cmd("--denylist", vec!["add", &arg.pkg]))
+                }
+                DenylistCommand::Rm(arg) => {
+                    try_run!(magisk.cmd("--denylist", vec!["rm", &arg.pkg]))
                 }
             }
         }

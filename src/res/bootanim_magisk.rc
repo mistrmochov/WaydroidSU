@@ -1,0 +1,42 @@
+service bootanim /system/bin/bootanimation
+	class core animation
+	user graphics
+	group graphics audio
+	disabled
+	oneshot
+	ioprio rt 0
+	task_profiles MaxPerformance
+
+on post-fs-data
+	start logd
+	exec u:r:su:s0 root root -- /system/etc/init/magisk/magisk64 --auto-selinux --setup-sbin /system/etc/init/magisk /debug_ramdisk
+	exec u:r:su:s0 root root -- /system/etc/init/magisk/magiskpolicy --live --magisk \"allow * magisk_file lnk_file *\"
+	mkdir /debug_ramdisk/.magisk 700
+	mkdir /debug_ramdisk/.magisk/mirror 700
+	mkdir /debug_ramdisk/.magisk/block 700
+	copy /system/etc/init/magisk/config /debug_ramdisk/.magisk/config
+	rm /dev/.magisk_unblock
+	start magisk_service_x
+	wait /dev/.magisk_unblock 40
+	rm /dev/.magisk_unblock
+
+service magisk_service_x /debug_ramdisk/magisk --auto-selinux --post-fs-data
+	user root
+	seclabel u:r:su:s0
+	oneshot
+
+service magisk_service_y /debug_ramdisk/magisk --auto-selinux --service
+	class late_start
+	user root
+	seclabel u:r:su:s0
+	oneshot
+
+on property:sys.boot_completed=1
+	mkdir /data/adb/magisk 755
+	exec u:r:su:s0 root root -- /debug_ramdisk/magisk --auto-selinux --boot-complete
+
+on property:init.svc.zygote=restarting
+	exec u:r:su:s0 root root -- /debug_ramdisk/magisk --auto-selinux --zygote-restart
+
+on property:init.svc.zygote=stopped
+	exec u:r:su:s0 root root -- /debug_ramdisk/magisk --auto-selinux --zygote-restart

@@ -1,0 +1,76 @@
+service bootanim /system/bin/bootanimation
+    class core animation
+    user graphics
+    group graphics audio
+    disabled
+    oneshot
+    ioprio rt 0
+    task_profiles MaxPerformance
+
+on post-fs-data
+    start logd
+    rm /dev/.magisk_unblock
+    mount tmpfs magisk /debug_ramdisk mode=0755
+    copy /system/etc/init/magisk/magisk /debug_ramdisk/magisk
+    chmod 0755 /debug_ramdisk/magisk
+    symlink ./magisk /debug_ramdisk/su
+    symlink ./magisk /debug_ramdisk/resetprop
+    copy /system/etc/init/magisk/magiskinit /debug_ramdisk/magiskinit
+    chmod 0750 /debug_ramdisk/magiskinit
+    copy /system/etc/init/magisk/magiskpolicy /debug_ramdisk/magiskpolicy
+    chmod 0755 /debug_ramdisk/magiskpolicy
+    symlink ./magiskpolicy /debug_ramdisk/supolicy
+    mkdir /debug_ramdisk/.magisk
+    mkdir /debug_ramdisk/.magisk/mirror 0
+    mkdir /debug_ramdisk/.magisk/block 0
+    mkdir /debug_ramdisk/.magisk/worker 0
+    mkdir /debug_ramdisk/.magisk/device 0
+    mkdir /debug_ramdisk/.magisk/busybox 0
+    mkdir /debug_ramdisk/.magisk/preinit 0
+    mkdir /debug_ramdisk/.magisk/rootdir 0
+    mkdir /debug_ramdisk/.magisk/pts 0
+    chmod 0711 /debug_ramdisk/.magisk/device
+    chmod 0777 /debug_ramdisk/.magisk/preinit
+    chmod 0755 /debug_ramdisk/.magisk/busybox
+    chmod 0000 /debug_ramdisk/.magisk/mirror
+    chmod 0755 /debug_ramdisk/.magisk/block
+    chmod 0000 /debug_ramdisk/.magisk/worker
+    chmod 0755 /debug_ramdisk/.magisk/rootdir
+    chmod 0755 /debug_ramdisk/.magisk/pts
+    mount tmpfs magisk /debug_ramdisk/.magisk/worker mode=0755
+    copy /system/etc/init/magisk/stub.apk /debug_ramdisk/stub.apk
+    chmod 0644 /debug_ramdisk/stub.apk
+    copy /system/etc/init/magisk/magisk.apk /debug_ramdisk/magisk.apk
+    chmod 0644 /debug_ramdisk/magisk.apk
+    copy /system/etc/init/magisk/loadpolicy.sh /debug_ramdisk/loadpolicy.sh
+    chmod 0755 /debug_ramdisk/loadpolicy.sh
+    exec u:r:magisk:s0 0 0 -- /system/bin/sh /debug_ramdisk/loadpolicy.sh
+    start magisk_service_x
+    wait /dev/.magisk_unblock 40
+    rm /dev/.magisk_unblock
+
+service magisk_service_x /debug_ramdisk/magisk --post-fs-data
+    user root
+    seclabel u:r:magisk:s0
+    oneshot
+
+service magisk_service_y /debug_ramdisk/magisk --service
+    class late_start
+    user root
+    seclabel u:r:magisk:s0
+    oneshot
+	
+on property:vold.decrypt=trigger_restart_framework
+    start magisk_service_y
+	
+on nonencrypted
+    start magisk_service_y
+
+on property:sys.boot_completed=1
+    exec u:r:magisk:s0 0 0 -- /debug_ramdisk/magisk --boot-complete
+
+on property:init.svc.zygote=restarting
+    exec u:r:magisk:s0 0 0 -- /debug_ramdisk/magisk --zygote-restart
+
+on property:init.svc.zygote=stopped
+    exec u:r:magisk:s0 0 0 -- /debug_ramdisk/magisk --zygote-restart

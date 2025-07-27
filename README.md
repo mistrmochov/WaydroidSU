@@ -18,6 +18,7 @@
     - [Updating Magisk using WaydroidSU](#updating-magisk-using-waydroidsu)
   - [SELinux - fully supported!](#selinux---fully-supported)
   - [Compatibility](#compatibility)
+  - [Issues](#issues)
 
 ## Introduction
 
@@ -80,11 +81,11 @@ Dependencies
 - Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`, `build-base`
 
 Runtime dependencies
-- Ubuntu/Debian: `liblzma5`, `libbz2-1.0`, `libssl3`, `libdbus-1-3`
-- Fedora: `xz-libs`, `bzip2-libs`, `openssl`, `dbus-libs`
-- Arch: `xz`, `bzip2`, `openssl`, `dbus`
-- SUSE: `liblzma5`, `libbz2-1`, `libopenssl3`, `libdbus-1-3`
-- Alpine: `xz-libs`, `bzip2`, `libssl3`, `libcrypto3`, `dbus-libs`
+- Ubuntu/Debian: `liblzma5`, `libbz2-1.0`, `libssl3`, `libdbus-1-3`, `libsystemd0`, `libcap2`
+- Fedora: `xz-libs`, `bzip2-libs`, `openssl`, `dbus-libs`, `systemd-libs`, `libcap`
+- Arch: `xz`, `bzip2`, `openssl`, `dbus`, `systemd-libs`, `libcap`
+- SUSE: `liblzma5`, `libbz2-1`, `libopenssl3`, `libdbus-1-3`, `libsystemd0`, `libcap2`
+- Alpine: `xz-libs`, `bzip2`, `libssl3`, `libcrypto3`, `dbus-libs`, `libelogind`, `libcap`
 
 Run the following commmands to build and install WaydroidSU:
 
