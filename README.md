@@ -28,7 +28,7 @@ As a follow up to this, I decided to develop full Magisk CLI installer and manag
 
 ## Notice
 
-Keep in mind, that this project is still in early stages and there might be some unexpected issues.
+If you are using latest git version of this project right now, there might some issues. My update is still incomplete!
 
 ## Installation
 

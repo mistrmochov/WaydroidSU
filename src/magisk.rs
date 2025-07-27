@@ -311,7 +311,7 @@ impl Magisk {
         if !self.installed {
             return Err(anyhow!("Magisk isn't installed!"));
         }
-        let zygisk_str = self.sqlite("\"SELECT value FROM settings WHERE key == 'zygisk'\"")?;
+        let zygisk_str = self.sqlite("\"SELECT value FROM settings WHERE key == \'zygisk\'\"")?;
 
         if let Some(zygisk) = zygisk_str.trim().split('=').last() {
             return Ok(zygisk == "1");
@@ -327,9 +327,9 @@ impl Magisk {
             return Err(anyhow!("Magisk isn't installed!"));
         }
         if enabled {
-            self.sqlite("\"REPLACE INTO settings (key,value) VALUES('zygisk',1)\"")?;
+            self.sqlite("\"REPLACE INTO settings (key,value) VALUES(\'zygisk\',1)\"")?;
         } else {
-            self.sqlite("\"REPLACE INTO settings (key,value) VALUES('zygisk',0)\"")?;
+            self.sqlite("\"REPLACE INTO settings (key,value) VALUES(\'zygisk\',0)\"")?;
         }
         Ok(())
     }
