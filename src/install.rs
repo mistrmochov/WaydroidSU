@@ -23,6 +23,11 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
             "Couldn't reach the \"mount_overlays\" config.",
         ));
 
+        if !waydroid.is_container_running()? {
+            msg_err("Waydroid container isn't running!");
+            return Ok(());
+        }
+
         if !has_overlay {
             print!(
                 "[{}] {} {} ",
@@ -45,17 +50,6 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
 
         if !update {
             msg_main("Installing Magisk...");
-        }
-
-        if waydroid.is_session_running(true, true)? && !(update || new) {
-            msg_sub("Stopping Waydroid session");
-            waydroid.stop(true)?;
-        }
-
-        if update || new {
-            if !waydroid.is_container_running()? {
-                return Err(anyhow!("Waydroid container isn't running!"));
-            }
         }
 
         let waydroid_data = PathBuf::from(get_data_home()?).join("waydroid/data");
@@ -89,15 +83,21 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
                 vec!["cp", "/system/etc/init/hw/init.zygote*", "/data/local/tmp/"],
                 true,
             )?;
-            msg_sub("Stopping Waydroid session");
-            waydroid.stop(true)?;
         }
+
+        msg_sub("Stopping Waydroid session");
+        waydroid.stop(true)?;
 
         if !has_overlay && !is_mounted_at(&tempdir.join("mnt").to_string_lossy())? {
             mount_system(waydroid.clone(), false)?;
         }
 
-        clean_up(rootfs.clone(), has_overlay, overlay_rw)?;
+        clean_up(
+            rootfs.clone(),
+            has_overlay,
+            overlay_rw,
+            waydroid_data.clone(),
+        )?;
 
         create_dir_check(magisk_dir.clone(), true)?;
         create_dir_check(rootfs.join("system/addon.d"), has_overlay)?;
@@ -268,7 +268,14 @@ pub fn remove(recover: bool, update: bool) -> anyhow::Result<()> {
     } else if !update {
         msg_main(&format!("Removing Magisk..."));
     }
+
     let mut waydroid = WaydroidContainer::new()?;
+
+    let waydroid_data = if waydroid.is_session_running(true, true)? {
+        PathBuf::from(get_data_home()?).join("waydroid/data")
+    } else {
+        PathBuf::new()
+    };
     if waydroid.is_session_running(true, true)? && !update {
         msg_sub("Stopping Waydroid");
         waydroid.stop(true)?;
@@ -298,7 +305,7 @@ pub fn remove(recover: bool, update: bool) -> anyhow::Result<()> {
     let bootanim_rc_gz_path = rootfs.join(BOOTANIM_RC_GZ_PATH);
 
     msg_sub("Removing files");
-    clean_up(rootfs.clone(), has_overlay, overlay_rw)?;
+    clean_up(rootfs.clone(), has_overlay, overlay_rw, waydroid_data)?;
     restore_sepolicy(rootfs.clone(), has_overlay)?;
     restore_init_zygote(rootfs, has_overlay)?;
     restore_bootanim(bootanim_rc_path, bootanim_rc_gz_path, has_overlay)?;

@@ -177,9 +177,13 @@ fn move_from_overlay_rw(overlay_rw: PathBuf, overlay: PathBuf) -> anyhow::Result
     Ok(())
 }
 
-pub fn clean_up(rootfs: PathBuf, has_overlay: bool, overlay_rw: PathBuf) -> anyhow::Result<()> {
-    let data_home = get_data_home()?;
-    let waydroid_data = PathBuf::from(data_home).join("waydroid/data");
+pub fn clean_up(
+    rootfs: PathBuf,
+    has_overlay: bool,
+    overlay_rw: PathBuf,
+    waydroid_data: PathBuf,
+) -> anyhow::Result<()> {
+    let rm_adb = !waydroid_data.to_string_lossy().is_empty();
     let adb_magisk = waydroid_data.join("adb/magisk");
 
     let common_paths = [
@@ -187,11 +191,14 @@ pub fn clean_up(rootfs: PathBuf, has_overlay: bool, overlay_rw: PathBuf) -> anyh
         rootfs.join(MAGISK_DIR),
         overlay_rw.join("system/addon.d/99-magisk.sh"),
         rootfs.join("system/addon.d/99-magisk.sh"),
-        adb_magisk,
     ];
 
     for path in common_paths {
         remove_check(path)?;
+    }
+
+    if rm_adb {
+        remove_check(adb_magisk)?;
     }
 
     if has_overlay {
