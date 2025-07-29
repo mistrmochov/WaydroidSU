@@ -19,6 +19,8 @@
   - [SELinux - fully supported!](#selinux---fully-supported)
   - [Compatibility](#compatibility)
   - [Issues](#issues)
+    - [Play Store issue](#play-store-issue)
+    - [Session as root issue](#session-as-root-issue)
 
 ## Introduction
 
@@ -156,6 +158,14 @@ At this point, this project only supports systems with 64 bits architecture.
 
 ## Issues
 
+### Play Store issue
+
 Some magisk modules in KitsuneMagisk might cause that Play Store cannot be loaded, it's basically stuck on the Play Store logo.
 
 So in my case, module `tricky_store` has been causing this issue. You can fix this issue by enabling `sulist` in `magiskhide` through the magisk manager or via WaydroidSU.
+
+### Session as root issue
+
+If you are using root as your default main account (logged in as a root user through your login screen), Magisk will not work.
+
+Magisk will be able to install, but `su` requests will get automatically rejected, there will be likely more issues around this thing.
