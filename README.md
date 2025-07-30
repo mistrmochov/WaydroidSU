@@ -15,6 +15,7 @@
   - [Usage](#usage)
     - [Installation of Magisk using WaydroidSU](#installation-of-magisk-using-waydroidsu)
       - [Notice](#notice-1)
+      - [Custom apk](#custom-apk)
     - [Updating Magisk using WaydroidSU](#updating-magisk-using-waydroidsu)
   - [SELinux - fully supported!](#selinux---fully-supported)
   - [Compatibility](#compatibility)
@@ -143,6 +144,10 @@ Now after Waydroid restarts, Magisk is fully installed.
 Please do NOT install Magisk through the Magisk manager app (`Direct install into system`)! It might break your setup as it uses a different installation process and you might need to reinstall Magisk!
 
 This is of course only the case for Kitsune as Magisk does not have such an option.
+
+#### Custom apk
+
+I just want to clarify, that the custom apk option is there just for testing. So remember, that if you try to install official versions of Magisk, it might not work at all or poorly.
 
 ### Updating Magisk using WaydroidSU
 
