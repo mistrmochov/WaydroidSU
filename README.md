@@ -80,7 +80,7 @@ Main building dependencies are `make` and `cargo`. This project has been made on
 Dependencies
 - Ubuntu/Debian: `libdbus-1-dev`, `libssl-dev`, `pkg-config`, `build-essential`
 - Fedora: `dbus-devel`, `openssl-devel`, `pkgconf-pkg-config`
-- Arch: `dbus`, `openssl`, `base-devel`
+- Arch: `dbus`, `openssl`, `base-devel`, `pkgconf`
 - SUSE: `dbus-1-devel`, `libopenssl-devel`, `pkgconf`
 - Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`, `build-base`
 
