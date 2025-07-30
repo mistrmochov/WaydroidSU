@@ -20,6 +20,13 @@
     - [magiskhide add](#magiskhide-add)
     - [magiskhide rm](#magiskhide-rm)
     - [magiskhide ls](#magiskhide-ls)
+  - [denylist](#denylist)
+    - [denylist status](#denylist-status)
+    - [denylist enable](#denylist-enable)
+    - [denylist disable](#denylist-disable)
+    - [denylist add](#denylist-add)
+    - [denylist rm](#denylist-rm)
+    - [denylist ls](#denylist-ls)
   - [zygisk](#zygisk)
     - [zygisk status](#zygisk-status)
     - [zygisk enable](#zygisk-enable)
@@ -172,7 +179,7 @@ Options:
 ## magiskhide
 
 ```
-Manage MagiskHide
+Manage MagiskHide (Kitsune)
 
 Usage: wsu magiskhide <COMMAND>
 
@@ -293,6 +300,97 @@ Options:
 List targets in hidelist/sulist
 
 Usage: wsu magiskhide ls
+
+Options:
+  -h, --help  Print help
+```
+
+## denylist
+
+```
+Manage Denylist (Magisk)
+
+Usage: wsu denylist <COMMAND>
+
+Commands:
+  status   Show Denylist status
+  enable   Enable Denylist
+  disable  Disable Denylist
+  add      Add target to Denylist
+  rm       Remove target from Denylist
+  ls       List targets in Denylist
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist status
+
+```
+Show Denylist status
+
+Usage: wsu denylist status
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist enable
+
+```
+Enable Denylist
+
+Usage: wsu denylist enable
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist disable
+
+```
+Disable Denylist
+
+Usage: wsu denylist disable
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist add
+
+```
+Add target to Denylist
+
+Usage: wsu denylist add <PKG>
+
+Arguments:
+  <PKG>  Target package
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist rm
+
+```
+Remove target from Denylist
+
+Usage: wsu denylist rm <PKG>
+
+Arguments:
+  <PKG>  Target package
+
+Options:
+  -h, --help  Print help
+```
+
+### denylist ls
+
+```
+List targets in Denylist
+
+Usage: wsu denylist ls
 
 Options:
   -h, --help  Print help
