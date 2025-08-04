@@ -46,7 +46,7 @@ on post-fs-data
     chmod 0755 /debug_ramdisk/loadpolicy.sh
     exec u:r:magisk:s0 0 0 -- /system/bin/sh /debug_ramdisk/loadpolicy.sh
     start magisk_service_x
-    wait /dev/.magisk_unblock 40
+    wait /dev/.magisk_unblock 1
     rm /dev/.magisk_unblock
 
 service magisk_service_x /debug_ramdisk/magisk --post-fs-data
