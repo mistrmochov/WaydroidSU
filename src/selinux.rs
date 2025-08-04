@@ -28,7 +28,7 @@ pub fn set_selinux_attr(file: &str, name: &str, value: &str) -> anyhow::Result<(
     let name = CString::new(name)?;
     let value = CString::new(value)?;
 
-    let ret = unsafe {
+    unsafe {
         setxattr(
             path.as_ptr(),
             name.as_ptr(),
@@ -38,12 +38,7 @@ pub fn set_selinux_attr(file: &str, name: &str, value: &str) -> anyhow::Result<(
         )
     };
 
-    if ret == 0 {
-        Ok(())
-    } else {
-        // setattr failed, ignoring
-        Ok(())
-    }
+    Ok(())
 }
 
 pub fn set_selinux_attr_recursive(dir: PathBuf, name: &str, value: &str) -> anyhow::Result<()> {
