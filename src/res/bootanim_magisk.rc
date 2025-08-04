@@ -25,12 +25,6 @@ service magisk_service_x /debug_ramdisk/magisk --auto-selinux --post-fs-data
 	seclabel u:r:su:s0
 	oneshot
 
-service magisk_service_y /debug_ramdisk/magisk --auto-selinux --service
-	class late_start
-	user root
-	seclabel u:r:su:s0
-	oneshot
-
 on property:sys.boot_completed=1
 	mkdir /data/adb/magisk 755
 	exec u:r:su:s0 root root -- /debug_ramdisk/magisk --auto-selinux --boot-complete
