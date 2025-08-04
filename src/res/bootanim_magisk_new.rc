@@ -54,6 +54,12 @@ service magisk_service_x /debug_ramdisk/magisk --post-fs-data
     seclabel u:r:magisk:s0
     oneshot
 
+service magisk_service_y /debug_ramdisk/magisk --service
+    class late_start
+    user root
+    seclabel u:r:magisk:s0
+    oneshot
+
 on property:sys.boot_completed=1
     exec u:r:magisk:s0 0 0 -- /debug_ramdisk/magisk --boot-complete
 
