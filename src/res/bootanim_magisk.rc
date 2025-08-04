@@ -17,7 +17,7 @@ on post-fs-data
 	copy /system/etc/init/magisk/config /debug_ramdisk/.magisk/config
 	rm /dev/.magisk_unblock
 	start magisk_service_x
-	wait /dev/.magisk_unblock 40
+	wait /dev/.magisk_unblock 1
 	rm /dev/.magisk_unblock
 
 service magisk_service_x /debug_ramdisk/magisk --auto-selinux --post-fs-data
