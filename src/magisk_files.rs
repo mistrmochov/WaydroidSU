@@ -72,17 +72,19 @@ pub fn status() -> anyhow::Result<()> {
     if !waydroid.is_container_running()? {
         return Err(anyhow!("Waydroid container isn't running!"));
     }
-    if !magisk_is_installed()? || !magisk_is_set_up()? {
-        return Err(anyhow!("Magisk isn't installed!"));
-    }
+    let installed = magisk_is_installed()? && magisk_is_set_up()?;
 
     let mut args = Vec::new();
     args.push("pidof");
     args.push("magiskd");
-    let daemon_running = if let Err(_) = waydroid_su(args, false) {
-        false
+    let daemon_running = if installed {
+        if let Err(_) = waydroid_su(args, false) {
+            false
+        } else {
+            true
+        }
     } else {
-        true
+        false
     };
     let daemon_running_str = if daemon_running {
         "Running".blue()
@@ -96,14 +98,14 @@ pub fn status() -> anyhow::Result<()> {
         let version = magisk.version();
         (
             if zygisk { "Yes".blue() } else { "No".red() },
-            version.to_string(),
+            version.blue(),
         )
     } else {
-        ("No".red(), "".to_string())
+        ("No".red(), "N/A".red())
     };
 
     msg_regular(&format!("Daemon: {}", daemon_running_str));
-    msg_regular(&format!("Installed: {}", version.blue()));
+    msg_regular(&format!("Installed: {}", version));
     msg_regular(&format!("Zygisk: {}", zygisk_str));
     Ok(())
 }
