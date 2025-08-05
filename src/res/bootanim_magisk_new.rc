@@ -46,7 +46,6 @@ on post-fs-data
     chmod 0755 /debug_ramdisk/loadpolicy.sh
     exec u:r:magisk:s0 0 0 -- /system/bin/sh /debug_ramdisk/loadpolicy.sh
     exec u:r:magisk:s0 0 0 -- /debug_ramdisk/magisk --post-fs-data
-    rm /dev/.magisk_unblock
 
 service magisk_service_y /debug_ramdisk/magisk --service
     class late_start
