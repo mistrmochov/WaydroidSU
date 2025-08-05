@@ -130,7 +130,7 @@ sudo wsu install --new # My new modern fork of Magisk
 sudo wsu install --apk /path/to/apk # Not recommended since this is the only version, that will work on Waydroid
 ```
 
-It is now required for Waydroid to be running before the installation! Keep in mind, that Waydroid will be booting much longer with Magisk installed.
+It is now required for Waydroid to be running before the installation!
 
 After your Waydroid boots app, run this command to run additional setup or upgrade the Magisk stub to full manager by clicking on it and then proceed to the additional setup.
 
