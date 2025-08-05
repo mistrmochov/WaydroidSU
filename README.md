@@ -14,6 +14,7 @@
   - [Building](#building)
   - [Usage](#usage)
     - [Installation of Magisk using WaydroidSU](#installation-of-magisk-using-waydroidsu)
+      - [New Magisk notice](#new-magisk-notice)
       - [Notice](#notice-1)
       - [Custom apk](#custom-apk)
     - [Updating Magisk using WaydroidSU](#updating-magisk-using-waydroidsu)
@@ -138,6 +139,14 @@ sudo wsu setup
 ```
 
 Now after Waydroid restarts, Magisk is fully installed.
+
+#### New Magisk notice
+
+If you are using my new modern fork of Magisk, please check its [repo](https://github.com/mistrmochov/MagiskForWaydroid), if new apk files has been added to the release, I am not making new releases for these changes, So it can be compatible with the official release versions, So I am just updating the files in the current release.
+
+The reason, why I am even saying this is because I am frequently fixing some major things in this fork.
+
+Meaning if you spot, that files has been recently readded, you will have to update it by reinstalling Magisk.
 
 #### Notice
 
