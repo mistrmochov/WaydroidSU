@@ -13,6 +13,7 @@ use rand::{Rng, distr::Alphanumeric};
 use reqwest::blocking::Client;
 use reqwest::header::CONTENT_LENGTH;
 use serde::Deserialize;
+use std::env;
 use std::env::temp_dir;
 use std::fs::File;
 use std::fs::{self, Permissions};
@@ -24,6 +25,7 @@ use std::process::{Command, Stdio};
 use std::result::Result::Ok as OtherOk;
 use std::thread::sleep;
 use std::time::Duration;
+use which::which;
 use zip::read::ZipArchive;
 
 #[derive(Debug, Deserialize)]
@@ -407,4 +409,48 @@ pub fn remove_check(file: PathBuf) -> anyhow::Result<bool> {
         }
     }
     Ok(exists)
+}
+
+pub fn is_waydroid_initialized() -> bool {
+    PathBuf::from(WAYDROID_CONFIG).exists()
+}
+
+pub fn command_exists(cmd: &str) -> bool {
+    which(cmd).is_ok()
+}
+
+pub fn root() -> bool {
+    let user_out = Command::new("bash")
+        .args(["-c", "whoami"])
+        .output()
+        .expect(&msg_err_str("Failed to execute \"whoami\" command."));
+    let user = String::from_utf8_lossy(&user_out.stdout).trim().to_string();
+
+    user == "root"
+}
+
+pub fn get_data_home() -> anyhow::Result<String> {
+    fn xdg_data_home() -> anyhow::Result<String> {
+        let waydroid = WaydroidContainer::new()?;
+        let session = waydroid.get_session();
+        if !session.is_empty() {
+            for (key, value) in session {
+                if key == "xdg_data_home" {
+                    return Ok(value);
+                }
+            }
+        }
+        Err(anyhow!("Couldn't get current xdg_data_home"))
+    }
+    if let OtherOk(sudo_home) = env::var("SUDO_HOME") {
+        if !sudo_home.contains("root") {
+            return Ok(PathBuf::from(sudo_home)
+                .join(".local/share")
+                .to_string_lossy()
+                .to_string());
+        }
+    } else {
+        return Ok(xdg_data_home()?);
+    }
+    Err(anyhow!("Couldn't get current xdg_data_home"))
 }

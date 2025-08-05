@@ -3,7 +3,7 @@ use crate::container::{WaydroidContainer, has_overlay};
 use crate::magisk::Magisk;
 use crate::selinux::*;
 use crate::utils::*;
-use crate::{get_data_home, msg_err_str, msg_regular, msg_sub};
+use crate::{msg_err_str, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use std::env;

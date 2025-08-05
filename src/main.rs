@@ -1,19 +1,15 @@
 use crate::cli::*;
-use crate::constants::WAYDROID_CONFIG;
-use crate::container::WaydroidContainer;
 use crate::install::{install, remove, setup, update};
 use crate::magisk::Magisk;
 use crate::magisk_files::status;
-use crate::utils::{get_arch, is_mounted_at, umount_system};
+use crate::utils::{
+    command_exists, get_arch, is_mounted_at, is_waydroid_initialized, root, umount_system,
+};
 use anyhow::{Ok, anyhow};
 use clap::Parser;
 use colored::*;
-use std::env;
 use std::env::temp_dir;
-use std::path::PathBuf;
-use std::process::Command;
 use std::result::Result::Ok as OtherOk;
-use which::which;
 
 mod cli;
 mod constants;
@@ -51,50 +47,6 @@ macro_rules! try_run_or_exit {
             return Ok(());
         }
     };
-}
-
-fn is_waydroid_initialized() -> bool {
-    PathBuf::from(WAYDROID_CONFIG).exists()
-}
-
-fn command_exists(cmd: &str) -> bool {
-    which(cmd).is_ok()
-}
-
-pub fn root() -> bool {
-    let user_out = Command::new("bash")
-        .args(["-c", "whoami"])
-        .output()
-        .expect(&msg_err_str("Failed to execute \"whoami\" command."));
-    let user = String::from_utf8_lossy(&user_out.stdout).trim().to_string();
-
-    user == "root"
-}
-
-pub fn get_data_home() -> anyhow::Result<String> {
-    fn xdg_data_home() -> anyhow::Result<String> {
-        let waydroid = WaydroidContainer::new()?;
-        let session = waydroid.get_session();
-        if !session.is_empty() {
-            for (key, value) in session {
-                if key == "xdg_data_home" {
-                    return Ok(value);
-                }
-            }
-        }
-        Err(anyhow!("Couldn't get current xdg_data_home"))
-    }
-    if let OtherOk(sudo_home) = env::var("SUDO_HOME") {
-        if !sudo_home.contains("root") {
-            return Ok(PathBuf::from(sudo_home)
-                .join(".local/share")
-                .to_string_lossy()
-                .to_string());
-        }
-    } else {
-        return Ok(xdg_data_home()?);
-    }
-    Err(anyhow!("Couldn't get current xdg_data_home"))
 }
 
 pub fn msg_err(msg: &str) {

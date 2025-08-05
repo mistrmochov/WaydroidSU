@@ -7,7 +7,7 @@ use crate::magisk_files::{
 };
 use crate::selinux::*;
 use crate::utils::*;
-use crate::{get_data_home, msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
+use crate::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use std::env::temp_dir;

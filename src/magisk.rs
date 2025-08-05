@@ -1,8 +1,8 @@
 use crate::container::WaydroidContainer;
 use crate::magisk_files::{magisk_is_installed, magisk_is_set_up, waydroid_su};
 use crate::selinux::getenforce;
-use crate::utils::{create_tmpdir, unzip_file};
-use crate::{get_data_home, msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
+use crate::utils::{create_tmpdir, get_data_home, unzip_file};
+use crate::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use std::collections::HashMap;
