@@ -359,6 +359,8 @@ impl Magisk {
             return Err(anyhow!("Magisk isn't installed!"));
         }
         let getenforce = getenforce()?;
+        let kitsune =
+            self.version().contains("kitsune") || self.version().contains("v27.2-Waydroid");
         let result = self.sqlite("\"SELECT uid,policy FROM policies\"", getenforce)?;
 
         let mut first_run = true;
@@ -367,9 +369,24 @@ impl Magisk {
                 msg_regular("Superuser:");
                 first_run = false;
             }
-            let mut parts = line.split('|');
-            let uid_field = parts.next();
-            let policy_field = parts.next();
+            let (uid_field, policy_field) = (
+                if kitsune {
+                    let mut parts = line.split('|');
+                    parts.next();
+                    parts.next()
+                } else {
+                    let mut parts = line.split('|');
+                    parts.next()
+                },
+                if kitsune {
+                    let mut parts = line.split('|');
+                    parts.next()
+                } else {
+                    let mut parts = line.split('|');
+                    parts.next();
+                    parts.next()
+                },
+            );
 
             let (policy_field, uid_field) = match (policy_field, uid_field) {
                 (Some(p), Some(u)) => (p.trim(), u.trim()),
