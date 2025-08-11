@@ -350,4 +350,157 @@ impl Magisk {
         }
         Ok(())
     }
+
+    pub fn superuser_list(&mut self) -> anyhow::Result<()> {
+        if !self.waydroid.is_container_running()? {
+            return Err(anyhow!("Waydroid container isn't running!"));
+        }
+        if !self.installed {
+            return Err(anyhow!("Magisk isn't installed!"));
+        }
+        let getenforce = getenforce()?;
+        let result = self.sqlite("\"SELECT uid,policy FROM policies\"", getenforce)?;
+
+        let mut first_run = true;
+        for line in result.lines() {
+            if first_run {
+                msg_regular("Superuser:");
+                first_run = false;
+            }
+            let mut parts = line.split('|');
+            let uid_field = parts.next();
+            let policy_field = parts.next();
+
+            let (policy_field, uid_field) = match (policy_field, uid_field) {
+                (Some(p), Some(u)) => (p.trim(), u.trim()),
+                _ => continue,
+            };
+
+            let policy_val: i32 = match policy_field
+                .split('=')
+                .last()
+                .and_then(|s| s.trim().parse().ok())
+            {
+                Some(v) => v,
+                None => continue,
+            };
+
+            let uid_num: i32 = match uid_field
+                .split('=')
+                .last()
+                .and_then(|s| s.trim().parse().ok())
+            {
+                Some(v) => v,
+                None => continue,
+            };
+
+            let pkgs = self.get_package(uid_num);
+            let verdict = if policy_val == 2 {
+                "allowed".blue()
+            } else {
+                "denied".red()
+            };
+
+            for pkg in pkgs {
+                msg_sub(&format!("- {} | {}", pkg, verdict));
+            }
+        }
+        Ok(())
+    }
+
+    pub fn superuser_manage(&mut self, pkg: &str, allow: bool) -> anyhow::Result<()> {
+        if !self.waydroid.is_container_running()? {
+            return Err(anyhow!("Waydroid container isn't running!"));
+        }
+        if !self.installed {
+            return Err(anyhow!("Magisk isn't installed!"));
+        }
+        let getenforce = getenforce()?;
+
+        let policy = if allow { "2" } else { "1" };
+        //let (pkgs, app_id) = self.get_package(query)
+        let app_id = self.get_app_id(pkg);
+        if app_id.is_empty() {
+            return Err(anyhow!("Invalid package name!"));
+        }
+
+        let arg = format!(
+            "\"REPLACE INTO policies VALUES({},{},0,1,1)\"",
+            app_id, policy
+        );
+        self.sqlite(&arg, getenforce)?;
+        Ok(())
+    }
+
+    fn get_package(&mut self, query: i32) -> Vec<String> {
+        let mut names = Vec::new();
+
+        if let OtherOk(result) = waydroid_su(
+            vec![
+                "pm",
+                "list",
+                "packages",
+                "-U",
+                "|",
+                "grep",
+                &query.to_string(),
+            ],
+            false,
+        ) {
+            for line in result.lines() {
+                let mut parts = line.split_whitespace();
+                if let Some(name_part) = parts.next() {
+                    if let Some(name) = name_part.split(':').last() {
+                        names.push(name.trim().to_string());
+                    }
+                }
+            }
+        }
+
+        if names.is_empty() {
+            names.push(format!("uid:{}", query));
+        }
+
+        names
+    }
+
+    fn get_app_id(&mut self, query: &str) -> String {
+        let mut app_id = String::new();
+
+        if let OtherOk(result) = waydroid_su(
+            vec![
+                "pm",
+                "list",
+                "packages",
+                "-U",
+                "|",
+                "grep",
+                &query.to_string(),
+            ],
+            false,
+        ) {
+            let mut contains = false;
+            for line in result.lines() {
+                let mut parts = line.split_whitespace();
+                if let Some(name_part) = parts.next() {
+                    if let Some(name) = name_part.split(':').last() {
+                        if query == name {
+                            contains = true;
+                        }
+                    }
+                }
+            }
+
+            let mut parts = result.split_whitespace();
+            parts.next();
+            if let Some(app_part) = parts.next() {
+                if let Some(uid) = app_part.split(':').last() {
+                    if contains {
+                        app_id = uid.to_string();
+                    }
+                }
+            }
+        }
+        app_id
+    }
 }

@@ -43,6 +43,11 @@ pub enum Commands {
         #[command(subcommand)]
         command: ZygiskCommand,
     },
+    #[command(about = "Manage su access")]
+    Superuser {
+        #[command(subcommand)]
+        command: SuperuserCommand,
+    },
 }
 
 #[derive(Args)]
@@ -144,4 +149,14 @@ pub struct ModuleRemoveArg {
 pub struct ModuleDisableEnableArg {
     #[arg(help = "Name of the target magisk module")]
     pub module: String,
+}
+
+#[derive(Subcommand)]
+pub enum SuperuserCommand {
+    #[command(about = "List allowed apps")]
+    List,
+    #[command(about = "Allow su access for app")]
+    Allow(AddRemoveArgs),
+    #[command(about = "Deny su access for app")]
+    Deny(AddRemoveArgs),
 }

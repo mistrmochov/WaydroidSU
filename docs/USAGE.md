@@ -31,6 +31,10 @@
     - [zygisk status](#zygisk-status)
     - [zygisk enable](#zygisk-enable)
     - [zygisk disable](#zygisk-disable)
+  - [superuser](#superuser)
+    - [superuser list](#superuser-list)
+    - [superuser allow](#superuser-allow)
+    - [superuser deny](#superuser-deny)
 
 
 # Usage
@@ -440,6 +444,61 @@ Options:
 Disable Zygisk
 
 Usage: wsu zygisk disable
+
+Options:
+  -h, --help  Print help
+```
+
+## superuser
+
+```
+Manage su access
+
+Usage: wsu superuser <COMMAND>
+
+Commands:
+  list   List allowed apps
+  allow  Allow su access for app
+  deny   Deny su access for app
+
+Options:
+  -h, --help  Print help
+```
+
+### superuser list
+
+```
+List allowed apps
+
+Usage: wsu superuser list
+
+Options:
+  -h, --help  Print help
+```
+
+### superuser allow
+
+```
+Allow su access for app
+
+Usage: wsu superuser allow <PKG>
+
+Arguments:
+  <PKG>  Target package
+
+Options:
+  -h, --help  Print help
+```
+
+### superuser deny
+
+```
+Deny su access for app
+
+Usage: wsu superuser deny <PKG>
+
+Arguments:
+  <PKG>  Target package
 
 Options:
   -h, --help  Print help

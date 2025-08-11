@@ -237,6 +237,14 @@ fn main() -> anyhow::Result<()> {
                 ZygiskCommand::Disable => try_run!(magisk.set_zygisk(false)),
             }
         }
+        Commands::Superuser { command } => {
+            let mut magisk = magisk_or_exit!();
+            match command {
+                SuperuserCommand::Allow(arg) => try_run!(magisk.superuser_manage(&arg.pkg, true)),
+                SuperuserCommand::Deny(arg) => try_run!(magisk.superuser_manage(&arg.pkg, false)),
+                SuperuserCommand::List => try_run!(magisk.superuser_list()),
+            }
+        }
     }
 
     Ok(())
