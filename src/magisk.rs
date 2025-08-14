@@ -419,7 +419,7 @@ impl Magisk {
             };
 
             for pkg in pkgs {
-                msg_sub(&format!("- {} | {}", pkg, verdict));
+                msg_sub(&format!("{} | {}", pkg, verdict));
             }
         }
         Ok(())
