@@ -5,9 +5,9 @@ use crate::magisk_files::{
     check_uninstall_manager, clean_up, magisk_is_installed, magisk_is_set_up, patch_bootanim,
     patch_init_zygote, restore_bootanim, restore_init_zygote, waydroid_su,
 };
+use crate::print::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use crate::selinux::*;
 use crate::utils::*;
-use crate::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use std::env::temp_dir;

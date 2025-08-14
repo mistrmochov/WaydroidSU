@@ -1,11 +1,10 @@
 use crate::constants::*;
 use crate::container::{WaydroidContainer, has_overlay};
 use crate::magisk::Magisk;
+use crate::print::{msg_err_str, msg_sub};
 use crate::selinux::*;
 use crate::utils::*;
-use crate::{msg_err_str, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
-use colored::*;
 use std::env;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader};
@@ -67,7 +66,7 @@ pub fn magisk_is_set_up() -> anyhow::Result<bool> {
         && (magisk_data.exists() || magisk_data64.exists()))
 }
 
-pub fn status() -> anyhow::Result<()> {
+pub fn get_status() -> anyhow::Result<(bool, String, bool)> {
     let mut waydroid = WaydroidContainer::new()?;
     if !waydroid.is_container_running()? {
         return Err(anyhow!("Waydroid container isn't running!"));
@@ -86,28 +85,13 @@ pub fn status() -> anyhow::Result<()> {
     } else {
         false
     };
-    let daemon_running_str = if daemon_running {
-        "Running".blue()
-    } else {
-        "Stopped".red()
-    };
-
-    let (zygisk_str, version) = if daemon_running {
+    let (zygisk, version) = if daemon_running {
         let mut magisk = Magisk::new()?;
-        let zygisk = magisk.get_zygisk()?;
-        let version = magisk.version();
-        (
-            if zygisk { "Yes".blue() } else { "No".red() },
-            version.blue(),
-        )
+        (magisk.get_zygisk()?, magisk.version().to_string())
     } else {
-        ("No".red(), "N/A".red())
+        (false, String::new())
     };
-
-    msg_regular(&format!("Daemon: {}", daemon_running_str));
-    msg_regular(&format!("Installed: {}", version));
-    msg_regular(&format!("Zygisk: {}", zygisk_str));
-    Ok(())
+    Ok((daemon_running, version, zygisk))
 }
 
 pub fn waydroid_su(args: Vec<&str>, force_no_su: bool) -> anyhow::Result<String> {

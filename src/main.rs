@@ -1,13 +1,12 @@
 use crate::cli::*;
 use crate::install::{install, remove, setup, update};
 use crate::magisk::Magisk;
-use crate::magisk_files::status;
+use crate::print::{msg_err, msg_regular, print_modules, print_status, print_superuser};
 use crate::utils::{
     command_exists, get_arch, is_mounted_at, is_waydroid_initialized, root, umount_system,
 };
 use anyhow::{Ok, anyhow};
 use clap::Parser;
-use colored::*;
 use std::env::temp_dir;
 use std::result::Result::Ok as OtherOk;
 
@@ -17,6 +16,7 @@ mod container;
 mod install;
 mod magisk;
 mod magisk_files;
+mod print;
 mod selinux;
 mod utils;
 
@@ -47,33 +47,6 @@ macro_rules! try_run_or_exit {
             return Ok(());
         }
     };
-}
-
-pub fn msg_err(msg: &str) {
-    eprintln!("{}: {}", "error".red().bold(), msg);
-}
-
-pub fn msg_err_str(msg: &str) -> String {
-    format!("{}: {}", "error".red().bold(), msg)
-}
-
-pub fn msg_main(msg: &str) {
-    println!("[{}] {}", "WSU".blue().bold(), msg.bold());
-}
-
-pub fn msg_sub(msg: &str) {
-    println!(" {}", msg);
-}
-
-pub fn msg_end(msg: &str) {
-    println!("\n{}", msg.bold());
-}
-
-pub fn msg_regular(msg: &str) {
-    println!("{}", msg.bold());
-}
-pub fn msg_regular_str(msg: &str) -> String {
-    format!("{}", msg.bold())
 }
 
 fn preflight() -> anyhow::Result<()> {
@@ -116,7 +89,7 @@ fn main() -> anyhow::Result<()> {
 
     match cli.command {
         Commands::Status => {
-            try_run!(status());
+            try_run!(print_status());
         }
         Commands::Install(args) => {
             let (arch, arch_supported) = get_arch();
@@ -154,7 +127,7 @@ fn main() -> anyhow::Result<()> {
         Commands::Module { command } => {
             let mut magisk = magisk_or_exit!();
             match command {
-                ModuleCommand::List => try_run!(magisk.list_modules()),
+                ModuleCommand::List => try_run!(print_modules(magisk)),
                 ModuleCommand::Install(arg) => try_run!(magisk.install_module(&arg.module)),
                 ModuleCommand::Remove(arg) => try_run!(magisk.remove_module(&arg.module)),
                 ModuleCommand::Disable(arg) => try_run!(magisk.disable_module(&arg.module)),
@@ -242,7 +215,7 @@ fn main() -> anyhow::Result<()> {
             match command {
                 SuperuserCommand::Allow(arg) => try_run!(magisk.superuser_manage(&arg.pkg, true)),
                 SuperuserCommand::Deny(arg) => try_run!(magisk.superuser_manage(&arg.pkg, false)),
-                SuperuserCommand::List => try_run!(magisk.superuser_list()),
+                SuperuserCommand::List => try_run!(print_superuser(magisk)),
             }
         }
     }

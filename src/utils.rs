@@ -1,7 +1,6 @@
 use crate::constants::WAYDROID_CONFIG;
 use crate::container::{WaydroidContainer, has_overlay};
-use crate::msg_sub;
-use crate::{msg_err, msg_err_str};
+use crate::print::{msg_err, msg_err_str, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use flate2::Compression;

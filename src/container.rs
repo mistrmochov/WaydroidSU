@@ -6,7 +6,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 use crate::constants::WAYDROID_CONFIG;
-use crate::{msg_err_str, msg_sub};
+use crate::print::{msg_err_str, msg_sub};
 
 pub struct WaydroidContainer {
     conn: Connection,

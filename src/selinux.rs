@@ -1,6 +1,6 @@
 use crate::constants::*;
 use crate::magisk_files::waydroid_su;
-use crate::msg_sub;
+use crate::print::msg_sub;
 use crate::utils::*;
 use anyhow::Ok;
 use libc::setxattr;

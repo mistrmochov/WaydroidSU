@@ -1,8 +1,8 @@
 use crate::container::WaydroidContainer;
 use crate::magisk_files::{magisk_is_installed, magisk_is_set_up, waydroid_su};
+use crate::print::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use crate::selinux::getenforce;
 use crate::utils::{create_tmpdir, get_data_home, unzip_file};
-use crate::{msg_end, msg_err, msg_err_str, msg_main, msg_regular, msg_sub};
 use anyhow::{Ok, anyhow};
 use colored::*;
 use std::collections::HashMap;
@@ -16,7 +16,7 @@ pub struct Magisk {
     waydroid: WaydroidContainer,
     installed: bool,
     version: String,
-    modules_path: PathBuf,
+    pub modules_path: PathBuf,
 }
 
 impl Magisk {
@@ -50,7 +50,7 @@ impl Magisk {
         &self.version
     }
 
-    pub fn list_modules(&mut self) -> anyhow::Result<()> {
+    pub fn get_list_modules(&mut self) -> anyhow::Result<Vec<String>> {
         if !self.waydroid.is_session_running(true, true)? {
             return Err(anyhow!("Waydroid session isn't running!"));
         }
@@ -61,21 +61,18 @@ impl Magisk {
 
         let path = &self.modules_path;
         if !path.exists() {
-            msg_regular("No modules installed.");
-            return Ok(());
+            return Err(anyhow!("No modules installed."));
         }
 
         let entries = match fs::read_dir(path) {
             OtherOk(entries) => entries.collect::<Result<Vec<_>, _>>()?,
             Err(_) => {
-                msg_regular("No modules installed.");
-                return Ok(());
+                return Err(anyhow!("No modules installed."));
             }
         };
 
         if entries.is_empty() {
-            msg_regular("No modules installed.");
-            return Ok(());
+            return Err(anyhow!("No modules installed."));
         }
 
         let mut modules = Vec::new();
@@ -88,19 +85,7 @@ impl Magisk {
             modules.push(name);
         }
 
-        msg_regular(&format!("Modules: {}", modules.len().to_string().blue()));
-
-        for module in modules {
-            let module_path = path.join(&module);
-            let disabled = module_path.join("disable").exists();
-            if disabled {
-                msg_sub(&format!("{module} (disabled)"));
-            } else {
-                msg_sub(&module);
-            }
-        }
-
-        Ok(())
+        Ok(modules)
     }
 
     fn is_module_disabled(&mut self, module: &str) -> anyhow::Result<bool> {
@@ -351,7 +336,7 @@ impl Magisk {
         Ok(())
     }
 
-    pub fn superuser_list(&mut self) -> anyhow::Result<()> {
+    pub fn get_superuser_list(&mut self) -> anyhow::Result<Vec<(String, &'static str)>> {
         if !self.waydroid.is_container_running()? {
             return Err(anyhow!("Waydroid container isn't running!"));
         }
@@ -363,12 +348,8 @@ impl Magisk {
             self.version().contains("kitsune") || self.version().contains("v27.2-Waydroid");
         let result = self.sqlite("\"SELECT uid,policy FROM policies\"", getenforce)?;
 
-        let mut first_run = true;
+        let mut superuser_list = Vec::new();
         for line in result.lines() {
-            if first_run {
-                msg_regular("Superuser:");
-                first_run = false;
-            }
             let (uid_field, policy_field) = (
                 if kitsune {
                     let mut parts = line.split('|');
@@ -412,17 +393,13 @@ impl Magisk {
             };
 
             let pkgs = self.get_package(uid_num);
-            let verdict = if policy_val == 2 {
-                "allowed".blue()
-            } else {
-                "denied".red()
-            };
+            let verdict = if policy_val == 2 { "allowed" } else { "denied" };
 
             for pkg in pkgs {
-                msg_sub(&format!("{} | {}", pkg, verdict));
+                superuser_list.push((pkg.clone(), verdict));
             }
         }
-        Ok(())
+        Ok(superuser_list)
     }
 
     pub fn superuser_manage(&mut self, pkg: &str, allow: bool) -> anyhow::Result<()> {
