@@ -53,12 +53,13 @@ Options:
 ## install
 
 ```
-Install KitsuneMagisk
+Install Magisk
 
 Usage: wsu install [OPTIONS]
 
 Options:
       --apk <APK>  Path to target apk (optional)
+  -k, --kitsune    Kitsune Magisk
   -h, --help       Print help
 ```
 

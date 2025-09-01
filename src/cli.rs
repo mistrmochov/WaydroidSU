@@ -54,8 +54,8 @@ pub enum Commands {
 pub struct InstallArgs {
     #[arg(long, help = "Path to target apk (optional)")]
     pub apk: Option<String>,
-    #[arg(short, long, help = "Modern version of Magisk")]
-    pub new: bool,
+    #[arg(short, long, help = "Kitsune Magisk")]
+    pub kitsune: bool,
 }
 
 #[derive(Subcommand)]

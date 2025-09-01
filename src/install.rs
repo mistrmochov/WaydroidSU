@@ -16,7 +16,7 @@ use std::io::{self, Write};
 use std::path::PathBuf;
 use std::result::Result::Ok as OtherOk;
 
-pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow::Result<()> {
+pub fn install(arch: &str, custom_apk: &str, update: bool, kitsune: bool) -> anyhow::Result<()> {
     if !magisk_is_installed()? || update {
         let mut waydroid = WaydroidContainer::new()?;
         let has_overlay = has_overlay().expect(&msg_err_str(
@@ -58,14 +58,14 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
         let magisk_tmp = tempdir.join("magisk");
         create_tmpdir()?;
 
-        let apk = resolve_apk(custom_apk, new.clone(), tempdir.clone())?;
+        let apk = resolve_apk(custom_apk, kitsune, tempdir.clone())?;
 
         if !magisk_tmp.exists() {
             fs::create_dir(magisk_tmp.clone())?;
         }
         msg_sub("Extracting Magisk");
         unzip_file(&apk.to_string_lossy(), &magisk_tmp.to_string_lossy())?;
-        let (libs, libs32, assets) = prepare_libs(magisk_tmp.clone(), arch, new.clone())?;
+        let (libs, libs32, assets) = prepare_libs(magisk_tmp.clone(), arch, kitsune)?;
 
         let rootfs = if has_overlay {
             PathBuf::from(WAYDROID_DIR).join("overlay")
@@ -77,7 +77,7 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
         let bootanim_rc_path = rootfs.join(BOOTANIM_RC_PATH);
         let bootanim_rc_gz_path = rootfs.join(BOOTANIM_RC_GZ_PATH);
 
-        if new {
+        if !kitsune {
             patch_sepolicy_prepare(waydroid_data.clone(), libs.join("libmagiskpolicy.so"))?;
             waydroid_su(
                 vec!["cp", "/system/etc/init/hw/init.zygote*", "/data/local/tmp/"],
@@ -117,7 +117,7 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
             }
         }
 
-        let lib_name = if new {
+        let lib_name = if !kitsune {
             "libmagisk.so"
         } else {
             "libmagisk32.so"
@@ -126,7 +126,7 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
 
         let mut required_files = vec!["boot_patch.sh", "util_functions.sh", "addon.d.sh"];
 
-        if new {
+        if !kitsune {
             required_files.extend_from_slice(&[
                 "app_functions.sh",
                 "module_installer.sh",
@@ -155,13 +155,13 @@ pub fn install(arch: &str, custom_apk: &str, update: bool, new: bool) -> anyhow:
             .ok_or_else(|| anyhow!(msg_err_str("Couldn't get a filename.")))?;
         fs::copy(&apk, magisk_dir.join(apk_name))?;
 
-        if new {
+        if !kitsune {
             patch_sepolicy(magisk_dir.clone(), rootfs.clone(), waydroid_data.clone())?;
             patch_init_zygote(rootfs.clone(), waydroid_data.clone())?;
             create_dir_check(rootfs.join("system/etc/init"), false)?;
         }
 
-        patch_bootanim(bootanim_rc_path, bootanim_rc_gz_path, has_overlay, new)?;
+        patch_bootanim(bootanim_rc_path, bootanim_rc_gz_path, has_overlay, kitsune)?;
 
         msg_sub("Finishing installation");
 
@@ -376,12 +376,12 @@ pub fn setup() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn resolve_apk(custom_apk: &str, new: bool, tempdir: PathBuf) -> anyhow::Result<PathBuf> {
+fn resolve_apk(custom_apk: &str, kitsune: bool, tempdir: PathBuf) -> anyhow::Result<PathBuf> {
     let apk = tempdir.join("magisk.apk");
     if custom_apk.is_empty() {
         let json_file = tempdir.join("channel.json");
         download_file(
-            if new {
+            if !kitsune {
                 "https://raw.githubusercontent.com/mistrmochov/MagiskForWaydroid/refs/heads/master/stable.json"
             } else {
                 "https://raw.githubusercontent.com/mistrmochov/KitsuneMagisk-Waydroid/refs/heads/kitsune/canary.json"
@@ -408,7 +408,7 @@ fn resolve_apk(custom_apk: &str, new: bool, tempdir: PathBuf) -> anyhow::Result<
 fn prepare_libs(
     magisk_tmp: PathBuf,
     arch: &str,
-    new: bool,
+    kitsune: bool,
 ) -> anyhow::Result<(PathBuf, PathBuf, PathBuf)> {
     let libs = magisk_tmp.join("lib").join(arch);
     let libs32 = if arch == "x86_64" {
@@ -421,11 +421,11 @@ fn prepare_libs(
     if !libs.exists() || !libs32.exists() || !assets.exists() {
         return Err(anyhow!("Structure of apk file hasn't been recognized."));
     }
-    if libs.join("libmagisk.so").exists() && !new {
+    if libs.join("libmagisk.so").exists() && kitsune {
         return Err(anyhow!(
             "Structure of this apk file requires flag \'--new\'/\'-n\'"
         ));
-    } else if libs.join("libmagisk64.so").exists() && new {
+    } else if libs.join("libmagisk64.so").exists() && !kitsune {
         return Err(anyhow!(
             "Structure of this apk file can't be installed with flag \'--new\'/\'-n\'"
         ));

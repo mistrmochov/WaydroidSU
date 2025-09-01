@@ -258,7 +258,7 @@ pub fn patch_bootanim(
     bootanim_rc_path: PathBuf,
     bootanim_rc_gz_path: PathBuf,
     has_overlay: bool,
-    new: bool,
+    kitsune: bool,
 ) -> anyhow::Result<()> {
     if bootanim_rc_path.exists() {
         if !bootanim_rc_gz_path.exists() {
@@ -275,7 +275,7 @@ pub fn patch_bootanim(
     msg_sub("Patching bootanim.rc");
     let x = generate_random_string(15);
     let y = generate_random_string(15);
-    let mut bootanim_rc_magisk = if new {
+    let mut bootanim_rc_magisk = if !kitsune {
         BOOTANIM_RC_MAGISK_NEW.replace("magisk_service_x", &x)
     } else {
         BOOTANIM_RC_MAGISK.replace("magisk_service_x", &x)

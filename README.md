@@ -32,7 +32,7 @@ As a follow up to this, I decided to develop full Magisk CLI installer and manag
 
 ### Update
 
-So I have created a new Magisk fork directly from topjohnwu (https://github.com/mistrmochov/MagiskForWaydroid), because Kitsune is pretty outdated and I personally don't like the direction where this project is going. So now you will have two options, you can stick to Kitsune or you can install my new modern fork of Magisk. It was a little tricky to get this working, because upstream Magisk doesn't have --setup-sbin like Kitsune has, but the result is worth it!
+So I have created a new Magisk fork directly from topjohnwu (https://github.com/mistrmochov/MagiskForWaydroid), because Kitsune is pretty outdated and as of now, it has been unfortunately archived. So now you will have two options, you can stick to Kitsune or you can install my new modern fork of Magisk. It was a little tricky to get this working, because upstream Magisk doesn't have --setup-sbin like Kitsune has, but the result is worth it!
 
 I made a similar patches I did to Kitsune, but I also had to make zygisk working as the official built in zygisk doesn't work on Waydroid. I basically implemented ReZygisk module directly into the Magisk itself, you as user won't see any difference at all. You will simply enable or disable zygisk in the settings as usual.
 
@@ -128,6 +128,13 @@ By default Magisk is installed to Waydroid's overlay system, however if your Way
 sudo wsu install # Normal installation
 sudo wsu install --new # My new modern fork of Magisk
 sudo wsu install --apk /path/to/apk # Not recommended since this is the only version, that will work on Waydroid
+```
+
+**If you are using latest git version of WaydroidSU, the installation commands has been slightly changed as this project has now defaulted to the new Magisk fork instead of Kitsune!**
+
+```bash
+sudo wsu install # Installation of new Magisk fork
+sudo wsu install --kitsune # Installation of KitsuneMagisk
 ```
 
 It is now required for Waydroid to be running before the installation!

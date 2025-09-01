@@ -95,7 +95,7 @@ fn main() -> anyhow::Result<()> {
             let (arch, arch_supported) = get_arch();
             if arch_supported {
                 let apk_path = args.apk.unwrap_or_else(|| "".to_string());
-                if let Err(e) = install(arch, &apk_path, false, args.new) {
+                if let Err(e) = install(arch, &apk_path, false, args.kitsune) {
                     msg_err(&e.to_string());
                     try_run!(remove(true, false));
                 }
