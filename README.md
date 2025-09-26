@@ -77,7 +77,7 @@ If you are using SUSE you might get a warning from zypper, that the package is n
 
 ## Building
 
-Main building dependencies are `make` and `cargo`. This project has been made on Rust version `1.89.0`, if your cargo version from your package manager isn't compatible with this project, please install cargo using rustup or install rust manually from the official website: https://www.rust-lang.org/tools/install
+Main building dependencies are `make` and `cargo`. This project has been made on Rust version `1.90.0`, if your cargo version from your package manager isn't compatible with this project, please install cargo using rustup or install rust manually from the official website: https://www.rust-lang.org/tools/install
 
 Dependencies
 - Ubuntu/Debian: `libdbus-1-dev`, `libssl-dev`, `pkg-config`, `build-essential`
