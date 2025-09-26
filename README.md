@@ -80,18 +80,18 @@ If you are using SUSE you might get a warning from zypper, that the package is n
 Main building dependencies are `make` and `cargo`. This project has been made on Rust version `1.90.0`, if your cargo version from your package manager isn't compatible with this project, please install cargo using rustup or install rust manually from the official website: https://www.rust-lang.org/tools/install
 
 Dependencies
-- Ubuntu/Debian: `libdbus-1-dev`, `libssl-dev`, `pkg-config`, `build-essential`
-- Fedora: `dbus-devel`, `openssl-devel`, `pkgconf-pkg-config`
-- Arch: `dbus`, `openssl`, `base-devel`, `pkgconf`
-- SUSE: `dbus-1-devel`, `libopenssl-devel`, `pkgconf`
-- Alpine: `dbus-dev`, `openssl-dev`, `pkgconf`, `build-base`
+- Ubuntu/Debian: `libdbus-1-dev` `libssl-dev` `pkg-config` `build-essential`
+- Fedora: `dbus-devel` `openssl-devel` `pkgconf-pkg-config`
+- Arch: `dbus` `openssl` `base-devel` `pkgconf`
+- SUSE: `dbus-1-devel` `libopenssl-devel` `pkgconf`
+- Alpine: `dbus-dev` `openssl-dev` `pkgconf` `build-base`
 
 Runtime dependencies
-- Ubuntu/Debian: `liblzma5`, `libbz2-1.0`, `libssl3`, `libdbus-1-3`, `libsystemd0`, `libcap2`
-- Fedora: `xz-libs`, `bzip2-libs`, `openssl`, `dbus-libs`, `systemd-libs`, `libcap`
-- Arch: `xz`, `bzip2`, `openssl`, `dbus`, `systemd-libs`, `libcap`
-- SUSE: `liblzma5`, `libbz2-1`, `libopenssl3`, `libdbus-1-3`, `libsystemd0`, `libcap2`
-- Alpine: `xz-libs`, `bzip2`, `libssl3`, `libcrypto3`, `dbus-libs`, `libelogind`, `libcap`
+- Ubuntu/Debian: `liblzma5` `libbz2-1.0` `libssl3` `libdbus-1-3` `libsystemd0` `libcap2`
+- Fedora: `xz-libs` `bzip2-libs` `openssl` `dbus-libs` `systemd-libs` `libcap`
+- Arch: `xz` `bzip2` `openssl` `dbus` `systemd-libs` `libcap`
+- SUSE: `liblzma5` `libbz2-1` `libopenssl3` `libdbus-1-3` `libsystemd0` `libcap2`
+- Alpine: `xz-libs` `bzip2` `libssl3` `libcrypto3` `dbus-libs` `libelogind` `libcap`
 
 Run the following commmands to build and install WaydroidSU:
 
