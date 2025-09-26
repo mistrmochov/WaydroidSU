@@ -46,27 +46,27 @@ Download your selected package and use your package manager to install it.
 
 Ubuntu:
 ```bash
-sudo apt install ./wsu-0.1.1-1-x86_64-ubuntu_24+.deb
+sudo apt install ./wsu-0.1.2-1-x86_64-ubuntu_24+.deb
 ```
 
 Fedora:
 ```bash
-sudo dnf install ./wsu-0.1.1-1-x86_64-fc42.rpm
+sudo dnf install ./wsu-0.1.2-1-x86_64-fc42.rpm
 ```
 
 Arch:
 ```bash
-sudo pacman -U ./wsu-0.1.1-1-x86_64-archlinux.pkg.tar.zst
+sudo pacman -U ./wsu-0.1.2-1-x86_64-archlinux.pkg.tar.zst
 ```
 
 SUSE:
 ```bash
-sudo zypper in ./wsu-0.1.1-1-x86_64-suse.rpm
+sudo zypper in ./wsu-0.1.2-1-x86_64-suse.rpm
 ```
 
 Alpine:
 ```bash
-sudo apk add ./wsu-0.1.1-1-x86_64-alpine.apk
+sudo apk add ./wsu-0.1.2-1-x86_64-alpine.apk
 ```
 
 If your distro isn't in releases you will have to build it yourself. I would still recommend you to build the program yourself always, it will make your life easier when updating and you will have always the latest build.
